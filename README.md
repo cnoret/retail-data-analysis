@@ -1,4 +1,4 @@
-# Weekly Sales Prediction Project
+# Retail Data Analysis and Prediction Project
 
 ## Overview
 
