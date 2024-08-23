@@ -64,8 +64,8 @@ def exploration():
     - **IsHoliday:** whether the week is a special holiday week
     """)
     st.dataframe(features.head())
-    st.metric(label = "Number of rows", value=features.shape[0])
-    st.metric(label = "Number of columns", value=features.shape[1])
+    st.metric(label = "Number of rows", value = features.shape[0])
+    st.metric(label = "Number of columns", value = features.shape[1])
     st.write("Missing values per column:")
     st.write(features.isna().sum())
     st.write("---")

@@ -90,7 +90,7 @@ def modelisation():
     st.subheader("Model Selection and Training")
     
     # Option to select model
-    model_choice = st.selectbox("Choose a model to train:", ("Linear Regression", "Random Forest Regressor"))
+    model_choice = st.selectbox("Choose a model to train :", ("Linear Regression", "Random Forest Regressor"))
     
     if model_choice == "Linear Regression":
         model = LinearRegression()
@@ -98,10 +98,10 @@ def modelisation():
         model = RandomForestRegressor(n_estimators = 100, random_state = 42)
     
     # Model training
-    st.write(f"Training the {model_choice} model...")
+    st.info(f"Training the {model_choice} model...", icon = "🤖")
     model.fit(X_train_scaled, y_train)
-    st.success(f"{model_choice} model trained successfully!")
-    
+    st.success(f"{model_choice} model trained successfully!", icon = "✅")
+
     st.write("---")
 
     # Model Evaluation
@@ -116,9 +116,8 @@ def modelisation():
     r2 = r2_score(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
     
-    st.write(f"**Mean Squared Error (MSE):** {mse:.2f}")
-    st.write(f"**Root Mean Squared Error (RMSE):** {rmse:.2f}")
     st.write(f"**R-squared (R²):** {r2:.2f}")
+    st.write(f"**Root Mean Squared Error (RMSE):** {rmse:.2f}")
     st.write(f"**Mean Absolute Error (MAE):** {mae:.2f}")
     
     st.write("---")
@@ -137,9 +136,15 @@ def modelisation():
     unemployment = st.number_input("Unemployment")
     store_type = st.selectbox("Store Type", [0, 1, 2])
     
-    input_data = np.array([[store, dept, is_holiday, temperature, fuel_price, cpi, unemployment, store_type]])
-    input_data_scaled = scaler.transform(input_data)
+    # Convert input data to a DataFrame with feature names
+    input_data = pd.DataFrame([[store, dept, is_holiday, temperature, 
+                                fuel_price, cpi, unemployment, store_type]],
+                                columns = features.columns)
     
+    # Scale the input data
+    input_data_scaled = scaler.transform(input_data)
+
+    # Predict the sales
     prediction = model.predict(input_data_scaled)
     
     st.write(f"**Predicted Weekly Sales:** ${prediction[0]:,.2f}")
