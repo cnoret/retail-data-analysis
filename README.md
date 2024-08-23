@@ -46,18 +46,11 @@ Make sure you have Python 3.8+ installed on your machine. You'll also need to in
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/your-username/weekly-sales-prediction.git
-    cd weekly-sales-prediction
+    git clone https://github.com/cnoret/retail-data-analysis.git
+    retail-data-analysis
     ```
 
-2. **Create a virtual environment (optional but recommended):**
-
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-    ```
-
-3. **Install the required packages:**
+3. **Install the required packages: (If you prefer, in a virtual environment)**
 
     ```bash
     pip install -r requirements.txt
@@ -68,7 +61,7 @@ Make sure you have Python 3.8+ installed on your machine. You'll also need to in
 1. **Navigate to the project directory:**
 
     ```bash
-    cd weekly-sales-prediction
+    cd retail-data-analysis
     ```
 
 2. **Run the Streamlit app:**
