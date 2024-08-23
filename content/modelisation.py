@@ -114,16 +114,22 @@ def modelisation():
     mse = mean_squared_error(y_test, y_pred)
     rmse = np.sqrt(mse)
     r2 = r2_score(y_test, y_pred)
-    mae = mean_absolute_error(y_test, y_pred)
     
     st.write(f"**R-squared (R²):** {r2:.2f}")
     st.write(f"**Root Mean Squared Error (RMSE):** {rmse:.2f}")
-    st.write(f"**Mean Absolute Error (MAE):** {mae:.2f}")
     
+    # Explanation of metrics
+    st.info("""
+    **Explanation of metrics:**
+    - **Root Mean Squared Error (RMSE):** The RMSE is the square root of the MSE and provides an error metric in the same units as the target variable (sales).
+    - **R-squared (R²):** R²
+     represents the proportion of the variance in the dependent variable (weekly sales) that is predictable from the independent variables. An R² close to 1 indicates that the model explains most of the variance in the outcome.
+    """, icon = '✨')
+
     st.write("---")
 
     # Predictions
-    st.subheader("Make Predictions")
+    st.subheader("Make your own “Weekly_Sales” predictions !")
     
     # Input features for prediction
     st.write("Input the following features to predict the Weekly Sales:")
@@ -147,4 +153,4 @@ def modelisation():
     # Predict the sales
     prediction = model.predict(input_data_scaled)
     
-    st.write(f"**Predicted Weekly Sales:** ${prediction[0]:,.2f}")
+    st.success(f"**Predicted Weekly Sales:** ${prediction[0]:,.2f}", icon = "🤖")

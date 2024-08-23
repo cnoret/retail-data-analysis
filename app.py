@@ -33,7 +33,7 @@ with st.sidebar:
                    "Resources"],
         default_index = 0)
 
-    # Team
+    # Author
     st.header("Author :")
     st.markdown('Christophe NORET&nbsp;&nbsp;[<img src="https://content.linkedin.com/content/dam/me/business/en-us/amp/brand-site/v2/bg/LI-Bug.svg.original.svg" width=25>](http://www.linkedin.com/in/christophenoret) [<img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width=25>](https://github.com/cnoret)', unsafe_allow_html=True)
 

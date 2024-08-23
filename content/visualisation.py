@@ -133,7 +133,5 @@ def visualisation():
     - Outside of these peak periods, the sales tend to fluctuate within a narrower range, with a slight downward trend observed in certain intervals, possibly due to seasonal effects or economic conditions.
     - **Business Implications:** Understanding the factors driving these sales spikes could help in planning future promotions or stocking strategies to optimize sales during these high-demand periods.
     """)
-    
-    st.write("---")
-    st.info("This page provides visual insights into the data, showcasing trends, distributions, and relationships within the dataset.")
+
 

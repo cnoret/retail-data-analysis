@@ -24,7 +24,6 @@ def resources():
     - **[NumPy](https://numpy.org/):** Essential for numerical computations and array manipulations.
     - **[Matplotlib](https://matplotlib.org/):** A plotting library used to create static, animated, and interactive visualizations.
     - **[Seaborn](https://seaborn.pydata.org/):** Built on top of Matplotlib, Seaborn is used for making attractive and informative statistical graphics.
-    - **[Plotly](https://plotly.com/python/):** Enables the creation of interactive plots and dashboards, providing advanced visualization capabilities.
     - **[Scikit-Learn](https://scikit-learn.org/stable/):** Used for machine learning tasks, including model building, evaluation, and data preprocessing.
     - **[Streamlit](https://streamlit.io/):** A framework for building and deploying interactive web applications directly from Python scripts.
     """)
@@ -37,7 +36,6 @@ def resources():
     - **[Jupyter Notebook](https://jupyter.org/):** A web-based interactive computing platform used for writing and executing Python code, performing data analysis, and documenting the process.
     - **[Visual Studio Code](https://code.visualstudio.com/):** A code editor redefined and optimized for building and debugging modern web and cloud applications. It was used extensively for code development.
     - **[Git](https://git-scm.com/):** A version control system that helps in tracking changes to the project code, enabling collaboration, and managing different versions of the project.
-    - **[GitHub](https://github.com/):** A platform for hosting and reviewing code, managing projects, and collaborating with others.
     - **[Streamlit Cloud](https://streamlit.io/cloud):** A cloud platform to deploy and share the Streamlit app, making the project accessible to users without needing local setup.
     """)
 
