@@ -31,6 +31,7 @@ This project is designed to analyze historical sales data from a large retail ch
 
 - `data/` - Folder containing the dataset files.
 - `images/` - Folder containing images used in the project.
+- 'content/' - Folder containing the different .py pages for the Streamlit app
 - `app.py` - The main Streamlit application file.
 - `README.md` - The file you are currently reading.
 - `requirements.txt` - Python dependencies required to run the project.
