@@ -30,7 +30,7 @@ def modelisation():
 
     st.write("---")
 
-    # Data Preprocessing
+    ## Data Preprocessing
     st.subheader("Data Preprocessing")
     
     # Explanation of Feature Selection
@@ -98,7 +98,10 @@ def modelisation():
         model = RandomForestRegressor(n_estimators = 100, random_state = 42)
     
     # Model training
-    st.info(f"Training the {model_choice} model...", icon = "🤖")
+    if model_choice == "Linear Regression":
+        st.info(f"Training the {model_choice} model...", icon = "🤖")
+    elif model_choice == "Random Forest Regressor":
+        st.info(f"Training the {model_choice} model... (~ 2 minutes)", icon = "🤖")
     model.fit(X_train_scaled, y_train)
     st.success(f"{model_choice} model trained successfully!", icon = "✅")
 
@@ -153,4 +156,9 @@ def modelisation():
     # Predict the sales
     prediction = model.predict(input_data_scaled)
     
+    # Displaying user data & predicted sales
+    st.write("**Selected user data:**")
+    st.dataframe(input_data)
+    st.write("**Scaled user data:**")
+    st.dataframe(pd.DataFrame(input_data_scaled, columns = X_train.columns).head())
     st.success(f"**Predicted Weekly Sales:** ${prediction[0]:,.2f}", icon = "🤖")
