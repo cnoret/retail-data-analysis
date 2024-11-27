@@ -22,7 +22,7 @@ st.set_page_config(page_title = "Retail Sales Analysis", page_icon = "images/fav
 with st.sidebar:
     image_side = Image.open("images/jedha.png")
     st.image(image_side)
-    st.header("Retail Sales Analysis")
+    st.header("Walmart Sales Prediction")
     choice = option_menu(
         menu_title = "Summary",
         options = ["Introduction",
