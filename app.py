@@ -20,7 +20,7 @@ st.set_page_config(page_title = "Retail Sales Analysis", page_icon = "images/fav
 
 ## Sidebar menu
 with st.sidebar:
-    image_side = Image.open("images/walmart.png")
+    image_side = Image.open("images/trolley.png")
     st.image(image_side)
     st.header("Walmart Sales Prediction")
     choice = option_menu(
