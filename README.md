@@ -1,96 +1,71 @@
-# Retail Data Analysis and Prediction Project
+# Walmart Sales Forecasting
 
-## Overview
+[![Live Demo](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://retail-data-analysis.streamlit.app/)
+![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)
+![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML-F7931E?logo=scikit-learn&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-This project is designed to analyze historical sales data from a large retail chain and predict weekly sales using machine learning models. The project involves data preprocessing, exploratory data analysis (EDA), and the development of predictive models to forecast sales. The project is implemented in Python and presented using a Streamlit web application.
+Predicting weekly department-level sales across 45 Walmart stores using machine learning — built as an end-to-end data science project with an interactive Streamlit app.
+
+**Dataset:** 421,570 weekly records · 45 stores · 81 departments · Feb 2010 – Oct 2012 · $6.7B total revenue
+
+---
 
 ## Features
 
-- **Data Exploration:** Analyze the historical sales data, visualize trends, distributions, and relationships between different variables.
-- **Correlation Analysis:** Compute and visualize the correlation matrix to understand the relationships between different features.
-- **Sales Trend Analysis:** Explore the sales trends over time to identify patterns and seasonal effects.
-- **Predictive Modeling:** Use machine learning models (e.g., Linear Regression, Random Forest Regressor) to predict weekly sales.
-- **Interactive Predictions:** Allow users to input data and generate predictions for weekly sales using the trained models.
+- **Data Exploration** — interactive overview of the three source datasets with missing value analysis
+- **Data Processing** — cleaning pipeline: imputation, date parsing, and dataset merging
+- **Analysis & Visualization** — interactive Plotly charts: correlation matrix, sales distribution, store rankings, time trends, and holiday impact
+- **Modeling** — Linear Regression vs Random Forest with R², RMSE, MAE metrics, Actual vs Predicted chart, and feature importance
+- **Live Predictions** — input any store/department/context and get an instant sales forecast
 
-## Technologies Used
+## Tech Stack
 
-- **Python 🐍**
-  - Pandas
-  - NumPy
-  - Matplotlib
-  - Seaborn
-  - Scikit-Learn
-  - Streamlit
-- **Development Tools**
-  - Jupyter Notebook
-  - Visual Studio Code
-  - Git
-  - GitHub
+| Layer | Libraries |
+| --- | --- |
+| Data | Pandas, NumPy |
+| ML | Scikit-Learn (LinearRegression, RandomForestRegressor) |
+| Visualization | Plotly |
+| App | Streamlit |
+| Deployment | Streamlit Cloud |
+
+## Quick Start
+
+```bash
+git clone https://github.com/cnoret/retail-data-analysis.git
+cd retail-data-analysis
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+App available at `http://localhost:8501`
 
 ## Project Structure
 
-- `data/` - Folder containing the dataset files.
-- `images/` - Folder containing images used in the project.
-- `content/` - Folder containing the different .py pages for the Streamlit app
-- `app.py` - The main Streamlit application file.
-- `README.md` - The file you are currently reading.
-- `requirements.txt` - Python dependencies required to run the project.
+```text
+retail-data-analysis/
+├── app.py                  # Entry point
+├── content/
+│   ├── intro.py
+│   ├── exploration.py
+│   ├── preparation.py
+│   ├── visualisation.py
+│   ├── modelisation.py
+│   └── resources.py
+├── data/                   # CSV datasets
+├── images/                 # UI assets
+└── requirements.txt
+```
 
-## Getting Started
+## Results
 
-### Prerequisites
+| Model | R² | RMSE |
+| --- | --- | --- |
+| Linear Regression | ~0.06 | ~$22,000 |
+| Random Forest | ~0.97 | ~$4,000 |
 
-Make sure you have Python 3.8+ installed on your machine. You'll also need to install the dependencies listed in the `requirements.txt` file.
-
-### Installation
-
-1. **Clone the repository:**
-
-    ```bash
-    git clone https://github.com/cnoret/retail-data-analysis.git
-    retail-data-analysis
-    ```
-
-3. **Install the required packages: (If you prefer, in a virtual environment)**
-
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-### Running the Application
-
-1. **Navigate to the project directory:**
-
-    ```bash
-    cd retail-data-analysis
-    ```
-
-2. **Run the Streamlit app:**
-
-    ```bash
-    streamlit run app.py
-    ```
-
-3. **Access the application in your browser:**
-   - The application should automatically open in your default web browser. If not, navigate to `http://localhost:8501/` in your browser.
-
-### Project Walkthrough
-
-1. **Data Exploration:**
-   - Start by exploring the datasets used in the project. The app will display data overviews, summaries, and visualizations to help understand the data.
-
-2. **Correlation Matrix:**
-   - Visualize the correlation matrix to understand the relationships between different features in the data.
-
-3. **Sales Trend Analysis:**
-   - Analyze the sales trends over time to identify significant patterns and peaks.
-
-4. **Modeling:**
-   - Train machine learning models to predict weekly sales based on historical data. The app allows you to choose between different models and evaluate their performance.
-
-5. **Make Predictions:**
-   - Use the app to input new data and generate predictions for weekly sales using the trained models.
+Random Forest significantly outperforms Linear Regression because `Store` and `Dept` are categorical identifiers — tree-based splits handle them naturally while linear models treat them as continuous values.
 
 ## License
 
-This project is open-source and available under the [MIT License](LICENSE).
+MIT — see [LICENSE](LICENSE).
