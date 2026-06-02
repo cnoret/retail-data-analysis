@@ -2,15 +2,20 @@
 Page : Modeling and prediction
 """
 
-import streamlit as st
-import pandas as pd
+import json
+import os
+from datetime import datetime
+
+import joblib
 import numpy as np
+import pandas as pd
 import plotly.express as px
+import streamlit as st
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
 FEATURE_COLS = [
     'Store', 'Dept', 'IsHoliday_x', 'Temperature',
@@ -28,14 +33,29 @@ FEATURE_LABELS = {
     'Type': 'Store type (encoded)',
 }
 
+MODELS_DIR = 'models'
+
+
+def _model_key(model_choice):
+    return model_choice.lower().replace(' ', '_')
+
+
+def _model_path(model_choice):
+    return os.path.join(MODELS_DIR, f"{_model_key(model_choice)}.joblib")
+
+
+def _info_path(model_choice):
+    return os.path.join(MODELS_DIR, f"{_model_key(model_choice)}_info.json")
+
 
 @st.cache_data
 def load_model_data():
     return pd.read_csv('data/merged_retail_data.csv')
 
 
-@st.cache_resource
-def get_model_pipeline(model_choice):
+@st.cache_data
+def _prepare_splits():
+    """Return deterministic train/test splits (random_state=42)."""
     data = pd.read_csv('data/merged_retail_data.csv')
     X = data[FEATURE_COLS].copy()
     y = data['Weekly_Sales']
@@ -46,15 +66,52 @@ def get_model_pipeline(model_choice):
     X_test = X_test.copy()
     X_train['Type'] = X_train['Type'].astype('category').cat.codes.astype(int)
     X_test['Type'] = X_test['Type'].astype('category').cat.codes.astype(int)
+    return X_train, X_test, y_train, y_test
+
+
+def _train_and_save(model_choice):
+    X_train, X_test, y_train, y_test = _prepare_splits()
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
+
     if model_choice == "Linear Regression":
         model = LinearRegression()
     else:
         model = RandomForestRegressor(n_estimators=100, random_state=42)
     model.fit(X_train_scaled, y_train)
+
+    # Save only model + scaler (not the data arrays)
+    os.makedirs(MODELS_DIR, exist_ok=True)
+    joblib.dump({'model': model, 'scaler': scaler}, _model_path(model_choice))
+
+    y_pred = model.predict(X_test_scaled)
+    info = {
+        'model': model_choice,
+        'trained_at': datetime.now().isoformat(timespec='seconds'),
+        'n_train': len(X_train),
+        'n_test': len(X_test),
+        'r2':   round(r2_score(y_test, y_pred), 4),
+        'rmse': round(np.sqrt(mean_squared_error(y_test, y_pred)), 2),
+        'mae':  round(mean_absolute_error(y_test, y_pred), 2),
+    }
+    with open(_info_path(model_choice), 'w', encoding='utf-8') as f:
+        json.dump(info, f, indent=2)
+
     return model, scaler, X_train, X_test, y_train, y_test, X_train_scaled, X_test_scaled
+
+
+@st.cache_resource
+def get_model_pipeline(model_choice):
+    path = _model_path(model_choice)
+    if os.path.exists(path):
+        saved = joblib.load(path)
+        model, scaler = saved['model'], saved['scaler']
+        X_train, X_test, y_train, y_test = _prepare_splits()
+        X_train_scaled = scaler.transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
+        return model, scaler, X_train, X_test, y_train, y_test, X_train_scaled, X_test_scaled
+    return _train_and_save(model_choice)
 
 
 def _compute_metrics(y_true, y_pred):
@@ -116,11 +173,25 @@ def modelisation():
         if model_choice == "Random Forest Regressor"
         else f"Training {model_choice}…"
     )
+    cached = os.path.exists(_model_path(model_choice))
     with st.spinner(label):
         pipeline = get_model_pipeline(model_choice)
     model, scaler, X_train, X_test, _, y_test, X_train_scaled, X_test_scaled = pipeline
 
-    st.success(f"{model_choice} trained on {len(X_train):,} samples.", icon="✅")
+    if cached:
+        info_path = _info_path(model_choice)
+        if os.path.exists(info_path):
+            with open(info_path, encoding='utf-8') as f:
+                info = json.load(f)
+            st.success(
+                f"Model loaded from disk — trained {info['trained_at']} "
+                f"on {info['n_train']:,} samples.",
+                icon="💾",
+            )
+        else:
+            st.success(f"{model_choice} loaded from disk.", icon="💾")
+    else:
+        st.success(f"{model_choice} trained and saved on {len(X_train):,} samples.", icon="✅")
 
     with st.expander("Preprocessing details"):
         col1, col2 = st.columns(2)

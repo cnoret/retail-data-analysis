@@ -1,3 +1,7 @@
+# ─── Model artifacts ─────────────────────────────────────────────────────────
+# Random Forest is too large for git — regenerated on first run
+models/random_forest_regressor.joblib
+
 # ─── Python ──────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]

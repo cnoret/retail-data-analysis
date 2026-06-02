@@ -1,0 +1,9 @@
+{
+  "model": "Linear Regression",
+  "trained_at": "2026-06-02T19:28:24",
+  "n_train": 337256,
+  "n_test": 84314,
+  "r2": 0.0614,
+  "rmse": 22124.02,
+  "mae": 14821.97
+}
