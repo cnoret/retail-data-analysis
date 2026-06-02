@@ -4,47 +4,65 @@ Page : Resources
 
 import streamlit as st
 
+
 def resources():
-    "Page content"
-    st.title("Resources and Technologies Used")
+    "Resources and tech stack page"
 
-    st.subheader("Data Sources")
-    st.markdown("""
-    The data used in this project comes from Kaggle:
-    - **[Historical Sales Data from 45 Stores](https://www.kaggle.com/datasets/manjeetsingh/retaildataset/data):** This dataset includes historical sales data along with additional features such as store information and economic indicators, which are crucial for the analysis and forecasting tasks undertaken in this project.
-    """)
+    st.title("Stack & Resources")
+    st.caption("Libraries, tools, and data sources used in this project.")
 
-    st.subheader("Skills and Technologies")
+    st.write("---")
 
-    st.markdown("#### Python 🐍")
-    st.markdown("""
-    Python was the primary programming language used in this project. Below are the key libraries and frameworks employed:
-    
-    - **[Pandas](https://pandas.pydata.org/):** Used for data manipulation and analysis, especially for handling structured data in DataFrames.
-    - **[NumPy](https://numpy.org/):** Essential for numerical computations and array manipulations.
-    - **[Matplotlib](https://matplotlib.org/):** A plotting library used to create static, animated, and interactive visualizations.
-    - **[Seaborn](https://seaborn.pydata.org/):** Built on top of Matplotlib, Seaborn is used for making attractive and informative statistical graphics.
-    - **[Scikit-Learn](https://scikit-learn.org/stable/):** Used for machine learning tasks, including model building, evaluation, and data preprocessing.
-    - **[Streamlit](https://streamlit.io/):** A framework for building and deploying interactive web applications directly from Python scripts.
-    """)
+    # ── Dataset ───────────────────────────────────────────────────────────────
+    st.subheader("Dataset")
+    st.markdown(
+        "**[Walmart Store Sales Forecasting](https://www.kaggle.com/datasets/manjeetsingh/retaildataset/data)** — Kaggle"
+    )
+    st.write(
+        "Anonymized weekly sales data from 45 US retail stores (Feb 2010 – Oct 2012), "
+        "including store metadata and economic indicators (CPI, unemployment, fuel price, temperature)."
+    )
 
-    st.subheader("Development and Deployment Tools")
+    st.write("---")
 
-    st.markdown("""
-    The following tools were integral in the development and deployment of this project:
-    
-    - **[Jupyter Notebook](https://jupyter.org/):** A web-based interactive computing platform used for writing and executing Python code, performing data analysis, and documenting the process.
-    - **[Visual Studio Code](https://code.visualstudio.com/):** A code editor redefined and optimized for building and debugging modern web and cloud applications. It was used extensively for code development.
-    - **[Git](https://git-scm.com/):** A version control system that helps in tracking changes to the project code, enabling collaboration, and managing different versions of the project.
-    - **[Streamlit Cloud](https://streamlit.io/cloud):** A cloud platform to deploy and share the Streamlit app, making the project accessible to users without needing local setup.
-    """)
+    # ── Tech stack ────────────────────────────────────────────────────────────
+    st.subheader("Tech Stack")
 
-    st.subheader("Additional Resources")
+    col1, col2 = st.columns(2)
 
-    st.markdown("""
-    - **[Kaggle](https://www.kaggle.com/):** Beyond just providing datasets, Kaggle is a platform for data science competitions and a resource for learning through community and shared notebooks.
-    - **[Stack Overflow](https://stackoverflow.com/):** An invaluable resource for troubleshooting coding issues, with a large community contributing solutions to a wide array of programming challenges.
-    - **[Jedha](https://www.jedha.co/):** Jedha is a data science bootcamp that provided the foundational knowledge and practical skills applied throughout this project.
-    """)
+    with col1:
+        st.markdown("**Data & ML**")
+        st.markdown("""
+- [Pandas](https://pandas.pydata.org/) — data manipulation
+- [NumPy](https://numpy.org/) — numerical computing
+- [Scikit-Learn](https://scikit-learn.org/) — modeling & preprocessing
+        """)
 
-    st.info("These resources were critical in the successful completion of this project, offering tools, knowledge, and community support at every stage.", icon = '✨')
+    with col2:
+        st.markdown("**Visualization & App**")
+        st.markdown("""
+- [Plotly](https://plotly.com/python/) — interactive charts
+- [Streamlit](https://streamlit.io/) — web app framework
+        """)
+
+    st.write("---")
+
+    # ── Tools ─────────────────────────────────────────────────────────────────
+    st.subheader("Development & Deployment")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("""
+- [Jupyter Notebook](https://jupyter.org/) — exploratory analysis
+- [VS Code](https://code.visualstudio.com/) — development
+        """)
+
+    with col2:
+        st.markdown("""
+- [Git & GitHub](https://github.com/cnoret/retail-data-analysis) — version control
+- [Streamlit Cloud](https://streamlit.io/cloud) — deployment
+        """)
+
+    st.write("---")
+    st.info("Source code available on [GitHub](https://github.com/cnoret/retail-data-analysis).", icon="💻")
