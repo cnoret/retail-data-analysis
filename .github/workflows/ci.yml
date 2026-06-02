@@ -18,8 +18,12 @@ jobs:
           python-version: "3.11"
       - name: Install ruff
         run: pip install ruff
-      - name: Run ruff
+      - name: Lint Python files
         run: ruff check .
+      - name: Lint notebook
+        run: |
+          pip install nbqa
+          nbqa ruff WalmartSalesPrediction.ipynb
 
   syntax:
     name: Syntax & Dependencies
@@ -35,3 +39,46 @@ jobs:
         run: python -m compileall -q content/ app.py
       - name: Check dependency consistency
         run: pip check
+
+  security:
+    name: Security (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pip-audit
+        run: pip install pip-audit
+      - name: Audit dependencies
+        run: pip-audit -r requirements.txt
+
+  models:
+    name: Model Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install joblib scikit-learn numpy pandas
+      - name: Validate models
+        run: |
+          python - <<'EOF'
+          import joblib
+          import numpy as np
+
+          FEATURE_COLS = [
+              'Store', 'Dept', 'IsHoliday_x', 'Temperature',
+              'Fuel_Price', 'CPI', 'Unemployment', 'Type',
+          ]
+          TEST_INPUT = [[20, 1, 0, 60.0, 3.5, 210.0, 8.0, 0]]
+
+          for name in ['linear_regression', 'random_forest_regressor']:
+              saved = joblib.load(f'models/{name}.joblib')
+              model, scaler = saved['model'], saved['scaler']
+              pred = model.predict(scaler.transform(TEST_INPUT))[0]
+              assert 0 < pred < 1_000_000, f'{name}: prediction {pred:,.0f} out of range'
+              print(f'{name}: OK  pred=${pred:,.0f}')
+          EOF
