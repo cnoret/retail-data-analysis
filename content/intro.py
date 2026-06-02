@@ -3,46 +3,48 @@ Page : Introduction
 """
 
 import streamlit as st
-from PIL import Image
 
 
 def introduction():
     "Home page content"
 
-    # Displaying the top image with a caption
-    image_top = Image.open("images/store.jpg")
     st.image(
-        image_top,
-        caption="Daniel Orth (www.flickr.com/photos/danorth1/1176509527), Licensed under the Creative Commons Attribution-NoDerivs 2.0 Generic | Flickr",
-        width=500,
+        "images/store.jpg",
+        width="stretch",
+        caption="Daniel Orth (www.flickr.com/photos/danorth1/1176509527), CC BY-ND 2.0 | Flickr",
     )
 
-    # Title and Introduction
-    st.subheader("Using Data Science to improve sales strategies")
+    st.title("Walmart Sales Forecasting")
+    st.caption("Predicting weekly retail sales across 45 stores using machine learning")
+
+    st.write("---")
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Stores", "45")
+    col2.metric("Departments", "81")
+    col3.metric("Weekly records", "421 K")
+    col4.metric("Total revenue", "$6.7 B")
+
+    st.write("---")
+
+    st.subheader("Project overview")
     st.write(
         """
-    **Objective:** To forecast retail sales and analyze the impact of various features on sales.
-    
-    **Importance:** Accurate sales predictions can optimize inventory management, enhance marketing strategies, and ultimately increase profitability. In this project, we'll use an anonymized dataset collected from 45 stores of a large retail chain to achieve these goals.
-    """
+        This project analyzes **3 years of anonymized sales data** (Feb 2010 – Oct 2012)
+        from a major US retail chain. The goal is to build models that accurately forecast
+        weekly department-level sales, enabling better inventory planning and marketing decisions.
+        """
     )
 
-    # Analysis Objectives
-    st.subheader("Analysis Objectives")
+    st.subheader("Objectives")
     st.write(
         """
-    In this project, we aim to achieve the following key objectives:
-    
-    1. **Sales Forecasting:** Develop models to predict future sales based on historical data and various influencing factors.
-    2. **Feature Impact Analysis:** Evaluate the impact of different features, such as promotions, holidays, and economic indicators, on sales.
-    3. **Store Performance Comparison:** Analyze the performance of individual stores and identify factors contributing to higher or lower sales.
-    4. **Anomaly Detection:** Detect anomalies in sales patterns, such as unexpected spikes or drops, and explore potential causes.
-    """
+        1. **Sales Forecasting** — Predict weekly sales per store and department using historical data and external factors.
+        2. **Feature Impact Analysis** — Quantify the effect of promotions, holidays, and economic indicators on sales.
+        3. **Store Performance Comparison** — Identify top-performing stores and the drivers behind their results.
+        4. **Anomaly Detection** — Surface unexpected sales spikes or drops and explore their causes.
+        """
     )
 
-    # Footer
     st.write("")
-    st.info(
-        "Let's explore the data and build models to improve sales strategies!",
-        icon="🚀",
-    )
+    st.info("Navigate through the sections using the sidebar to explore the full analysis.", icon="👈")

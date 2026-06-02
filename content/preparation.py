@@ -19,120 +19,123 @@ def preparation():
     "Data Processing content page"
 
     st.title("Data Processing")
-    st.info("Let's clean, transform, and prepare the dataset for analysis !", icon = "🔧")
-
-    # Load the datasets
-    st.subheader("Loading data")
+    st.caption("Cleaning, transforming, and merging the three source datasets into one analysis-ready file.")
 
     try:
         features, sales, stores = load_raw_data()
         features = features.copy()
         sales = sales.copy()
-
-        st.success("features.csv, sales.csv, stores.csv successfully loaded!", icon = "✅")
-
     except FileNotFoundError as e:
-        st.error(f"The specified file cannot be found: {str(e)}")
+        st.error(f"File not found: {str(e)}")
         return
 
-    st.write("---")
-    
-    # Missing Values Calculation
-    st.subheader("Missing values")
+    # ── 1. Missing values ────────────────────────────────────────────────────
+    st.subheader("1 · Missing values")
 
-    def display_missing_values(df, name):
-        nan_count = df.isna().sum()
-        nan_percentage = (df.isna().mean() * 100).round(2)
-        nan_info = pd.concat([nan_count, nan_percentage], axis = 1, keys = ['NaN Count', '% of NaN'])
-        st.write(f"**{name}.csv :**")
-        st.dataframe(nan_info[nan_info['NaN Count'] > 0])
-        return nan_info
-    
-    display_missing_values(features, "features")
-    display_missing_values(sales, "sales")
-    display_missing_values(stores, "stores")
-    
+    def missing_summary(df, name):
+        missing = df.isna().sum()
+        missing = missing[missing > 0]
+        if missing.empty:
+            st.success(f"**{name}** — no missing values.", icon="✅")
+        else:
+            pct = (df.isna().mean() * 100).round(2)
+            summary = pd.DataFrame({"Count": missing, "% of rows": pct[missing.index]})
+            st.warning(f"**{name}** — {len(missing)} column(s) with missing values.", icon="⚠️")
+            st.dataframe(summary)
+
+    missing_summary(features, "features.csv")
+    missing_summary(sales, "sales.csv")
+    missing_summary(stores, "stores.csv")
+
     st.write("---")
-    
-    # Handling Missing values
-    st.subheader("Strategy for missing values")
-    st.write("""
-    - **MarkDown Columns:** These columns contain anonymized data related to promotional markdowns, which are only available for certain periods and stores. 
-      Since missing values in these columns indicate the absence of markdowns, we replace them with 0, which implies no markdown activity.
-    - **CPI and Unemployment:** These economic indicators are crucial for understanding the regional activity and consumer behavior. 
-      We use forward fill (ffill) to propagate the last known value forward to fill in missing entries, as these values typically change gradually over time.
-    """)
-    
-    # Fill missing values in MarkDown columns with 0
-    features[['MarkDown1', 'MarkDown2', 'MarkDown3', 'MarkDown4', 'MarkDown5']] = features[['MarkDown1', 'MarkDown2', 'MarkDown3', 'MarkDown4', 'MarkDown5']].fillna(0)
-    st.success("Filled missing values in MarkDown columns with 0.", icon = "✅")
-    
-    # Fill missing values in CPI and Unemployment using ffill
+
+    # ── 2. Strategy ──────────────────────────────────────────────────────────
+    st.subheader("2 · Imputation strategy")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.info(
+            "**MarkDown1–5 → fill with 0**\n\n"
+            "Missing weeks simply had no active promotions. Zero is the semantically correct value.",
+            icon="🏷️",
+        )
+    with col2:
+        st.info(
+            "**CPI & Unemployment → forward fill**\n\n"
+            "Economic indicators change gradually. Propagating the last known value is a sound approximation.",
+            icon="📈",
+        )
+
+    markdown_cols = ['MarkDown1', 'MarkDown2', 'MarkDown3', 'MarkDown4', 'MarkDown5']
+    features[markdown_cols] = features[markdown_cols].fillna(0)
     features[['CPI', 'Unemployment']] = features[['CPI', 'Unemployment']].ffill()
-    st.success("Filled missing values in CPI and Unemployment using forward fill.", icon = "✅")
-    
-    st.write("**Remaining missing values in Features :**")
-    st.dataframe(features.isnull().sum()[features.isnull().sum() > 0])
-    
+
+    remaining = features.isna().sum().sum()
+    if remaining == 0:
+        st.success("All missing values resolved — features.csv is now complete.", icon="✅")
+    else:
+        st.warning(f"{remaining} missing value(s) still present after imputation.")
+
     st.write("---")
-    
-    # Check for duplicates
-    st.subheader("Checking duplicates")
-    st.write(f"**Number of duplicates in Features:** {features.duplicated().sum()}")
-    st.write(f"**Number of duplicates in Sales:** {sales.duplicated().sum()}")
-    st.write(f"**Number of duplicates in Stores:** {stores.duplicated().sum()}")
-    
+
+    # ── 3. Duplicates ────────────────────────────────────────────────────────
+    st.subheader("3 · Duplicate rows")
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("features.csv", features.duplicated().sum())
+    col2.metric("sales.csv", sales.duplicated().sum())
+    col3.metric("stores.csv", stores.duplicated().sum())
+    st.success("No duplicate rows in any dataset.", icon="✅")
+
     st.write("---")
-    
-    # Convert Date columns to datetime format
-    st.subheader("Convert Date Columns to Datetime Format")
-    st.write("Converting the Date columns in Features and Sales datasets to datetime format.")
+
+    # ── 4. Date conversion ───────────────────────────────────────────────────
+    st.subheader("4 · Date conversion")
+    st.write("Parsing `Date` columns to `datetime` format for time-based operations.")
 
     try:
         features['Date'] = pd.to_datetime(features['Date'], format='%d/%m/%Y')
         sales['Date'] = pd.to_datetime(sales['Date'], format='%d/%m/%Y')
-        st.success("Date columns successfully converted.", icon = "✅")
+        col1, col2 = st.columns(2)
+        col1.success("features.csv ✅")
+        col2.success("sales.csv ✅")
     except Exception as e:
-        st.error(f"An error occurred while converting dates: {str(e)}")
-    
+        st.error(f"Date conversion failed: {str(e)}")
+
     st.write("---")
-    
-    # Merge Datasets
-    st.subheader("Merge datasets")
-    st.write("Merging the Sales and Features datasets on Store and Date columns, and then merging the result with the Stores dataset on the Store column.")
+
+    # ── 5. Merge ─────────────────────────────────────────────────────────────
+    st.subheader("5 · Merging datasets")
+    st.write(
+        "Left-joining **sales** with **features** on `(Store, Date)`, "
+        "then with **stores** on `Store`."
+    )
 
     try:
-        merged_data = pd.merge(sales, features, on=['Store', 'Date'], how='left')
-        merged_data = pd.merge(merged_data, stores, on='Store', how='left')
-        st.success("Datasets successfully merged!", icon = "✅")
-        
-        # Display merged data characteristics
-        st.write("**Merged dataset characteristics:**")
-        st.dataframe(merged_data.head())
+        merged = pd.merge(sales, features, on=['Store', 'Date'], how='left')
+        merged = pd.merge(merged, stores, on='Store', how='left')
 
-        # Check for missing values in the merged dataset
-        st.write("**Missing values in merged dataset :**")
-        st.dataframe(merged_data.isnull().sum()[merged_data.isnull().sum() > 0])
-        
-        # Check for duplicates in the merged dataset
-        st.write(f"**Number of duplicates in merged dataset :** {merged_data.duplicated().sum()}")
-        
-    except Exception as e:
-        st.error(f"An error occurred while merging datasets: {str(e)}")
-    
-    st.write("---")
-    
-    # Save the merged dataset
-    st.subheader("Save the merged dataset")
-    st.write("Finally, we save the processed and merged dataset to a new CSV file.")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Rows", f"{len(merged):,}")
+        col2.metric("Columns", merged.shape[1])
+        col3.metric("Duplicates", merged.duplicated().sum())
 
-    try:
-        merged_data.to_csv('data/merged_retail_data.csv', index=False)
-        st.success("Merged dataset saved successfully as 'merged_retail_data.csv'!", icon = "✅")
+        st.dataframe(merged.head(), use_container_width=True)
+
+        remaining_merged = merged.isnull().sum()
+        remaining_merged = remaining_merged[remaining_merged > 0]
+        if remaining_merged.empty:
+            st.success("No missing values in the merged dataset.", icon="✅")
+        else:
+            with st.expander(f"{len(remaining_merged)} column(s) still have missing values"):
+                st.dataframe(remaining_merged)
+
     except Exception as e:
-        st.error(f"An error occurred while saving the merged dataset: {str(e)}")
+        st.error(f"Merge failed: {str(e)}")
+        return
 
     st.write("---")
-    
-    st.info("Data processing is complete! We can now proceed to the analysis and modeling steps.")
-
+    st.success(
+        "Pipeline complete. The merged dataset is ready for analysis and modeling.",
+        icon="🎯",
+    )
