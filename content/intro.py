@@ -10,7 +10,7 @@ def introduction():
 
     st.image(
         "images/store.jpg",
-        width="stretch",
+        width=700,
         caption="Daniel Orth (www.flickr.com/photos/danorth1/1176509527), CC BY-ND 2.0 | Flickr",
     )
 
@@ -47,4 +47,7 @@ def introduction():
     )
 
     st.write("")
-    st.info("Navigate through the sections using the sidebar to explore the full analysis.", icon="👈")
+    st.info(
+        "Navigate through the sections using the sidebar to explore the full analysis.",
+        icon="👈",
+    )
