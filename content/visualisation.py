@@ -9,11 +9,13 @@ import plotly.express as px
 
 @st.cache_data
 def load_viz_data():
+    "Load merged retail dataset."
     return pd.read_csv('data/merged_retail_data.csv')
 
 
 @st.cache_data
 def prepare_correlation_data(df):
+    "Encode categorical columns and return numeric correlation matrix."
     encoded = df.copy()
     encoded['Type'] = encoded['Type'].astype('category').cat.codes
     encoded['IsHoliday_x'] = encoded['IsHoliday_x'].astype(int)
@@ -45,7 +47,7 @@ def visualisation():
         title="Feature Correlation Matrix",
         height=700,
     )
-    fig.update_layout(margin=dict(l=0, r=0))
+    fig.update_layout(margin={"l": 0, "r": 0})
     st.plotly_chart(fig, width='stretch')
 
     with st.expander("Key insights"):

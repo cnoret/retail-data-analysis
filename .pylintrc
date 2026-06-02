@@ -1,0 +1,12 @@
+[MESSAGES CONTROL]
+disable=
+    C0103,  # invalid-name: ML convention uses uppercase X_train, X_test, etc.
+    C0114,  # missing-module-docstring: Jupyter notebooks have no module docstring
+    C0301,  # line-too-long: handled by ruff (E501 ignored in ruff.toml)
+    R0914,  # too-many-locals: Streamlit pages are necessarily verbose
+    R0915,  # too-many-statements: same
+    W0621,  # redefined-outer-name: expected in notebooks where cells share scope
+    W0718,  # broad-exception-caught: catch-all handlers for user-facing error messages
+
+[FORMAT]
+max-line-length=100

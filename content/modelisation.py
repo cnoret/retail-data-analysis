@@ -50,6 +50,7 @@ def _info_path(model_choice):
 
 @st.cache_data
 def load_model_data():
+    "Load merged retail dataset."
     return pd.read_csv('data/merged_retail_data.csv')
 
 
@@ -105,6 +106,7 @@ def _train_and_save(model_choice):
 
 @st.cache_resource
 def get_model_pipeline(model_choice):
+    "Load model from disk if available, otherwise train and save."
     path = _model_path(model_choice)
     if os.path.exists(path):
         saved = joblib.load(path)
@@ -257,7 +259,7 @@ def modelisation():
     )
     fig.add_shape(
         type="line", x0=0, y0=0, x1=max_val, y1=max_val,
-        line=dict(color="red", dash="dash", width=1.5),
+        line={"color": "red", "dash": "dash", "width": 1.5},
     )
     fig.update_layout(height=450)
     st.plotly_chart(fig, width='stretch')

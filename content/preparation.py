@@ -8,6 +8,7 @@ import pandas as pd
 
 @st.cache_data
 def load_raw_data():
+    "Load raw source CSV files."
     return (
         pd.read_csv('data/features.csv'),
         pd.read_csv('data/sales.csv'),

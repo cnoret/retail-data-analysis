@@ -8,6 +8,7 @@ import pandas as pd
 
 @st.cache_data
 def load_exploration_data():
+    "Load all source CSV files."
     df = pd.read_csv('data/merged_retail_data.csv')
     stores = pd.read_csv('data/stores.csv')
     sales = pd.read_csv('data/sales.csv')
