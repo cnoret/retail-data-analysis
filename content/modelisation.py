@@ -44,8 +44,8 @@ def get_model_pipeline(model_choice):
     )
     X_train = X_train.copy()
     X_test = X_test.copy()
-    X_train.loc[:, 'Type'] = X_train['Type'].astype('category').cat.codes
-    X_test.loc[:, 'Type'] = X_test['Type'].astype('category').cat.codes
+    X_train['Type'] = X_train['Type'].astype('category').cat.codes.astype(int)
+    X_test['Type'] = X_test['Type'].astype('category').cat.codes.astype(int)
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
