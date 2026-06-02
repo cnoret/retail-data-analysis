@@ -64,8 +64,8 @@ retail-data-analysis/
 | Linear Regression | ~0.06 | ~$22,000 |
 | Random Forest | ~0.97 | ~$4,000 |
 
-Random Forest significantly outperforms Linear Regression because `Store` and `Dept` are categorical identifiers — tree-based splits handle them naturally while linear models treat them as continuous values.
+Random Forest significantly outperforms Linear Regression because `Store` and `Dept` are categorical identifiers, tree-based splits handle them naturally while linear models treat them as continuous values.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT - [LICENSE](LICENSE).
