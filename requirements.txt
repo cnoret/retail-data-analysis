@@ -1,8 +1,7 @@
-matplotlib
 numpy
 pandas
 scikit-learn
 streamlit
 streamlit_option_menu
-seaborn
 plotly
+Pillow

@@ -5,7 +5,6 @@ app.py : Main
 ## Streamlit & UI
 import streamlit as st
 from streamlit_option_menu import option_menu
-from PIL import Image
 
 ## Importing pages
 from content.intro import introduction
@@ -16,13 +15,12 @@ from content.modelisation import modelisation
 from content.resources import resources
 
 ## Page title & favicon
-st.set_page_config(page_title = "Retail Sales Analysis", page_icon = "images/favicon.png")
+st.set_page_config(page_title="Walmart Sales Forecasting", page_icon="images/favicon.png")
 
 ## Sidebar menu
 with st.sidebar:
-    image_side = Image.open("images/trolley.png")
-    st.image(image_side)
-    st.header("Walmart Sales Prediction")
+    st.image("images/trolley.png")
+    st.header("Walmart Sales Forecasting")
     choice = option_menu(
         menu_title = "Summary",
         options = ["Introduction",
