@@ -78,7 +78,9 @@ def _train_and_save(model_choice):
     if model_choice == "Linear Regression":
         model = LinearRegression()
     else:
-        model = RandomForestRegressor(n_estimators=100, random_state=42)
+        model = RandomForestRegressor(
+            n_estimators=20, max_depth=10, n_jobs=1, random_state=42
+        )
     model.fit(X_train_scaled, y_train)
 
     # Save only model + scaler (not the data arrays)
@@ -169,8 +171,8 @@ def modelisation():
     )
 
     label = (
-        f"Training {model_choice}… (~2 min)"
-        if model_choice == "Random Forest Regressor"
+        f"Loading {model_choice}…"
+        if os.path.exists(_model_path(model_choice))
         else f"Training {model_choice}…"
     )
     cached = os.path.exists(_model_path(model_choice))
