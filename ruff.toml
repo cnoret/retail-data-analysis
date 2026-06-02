@@ -1,0 +1,13 @@
+line-length = 100
+target-version = "py38"
+
+[lint]
+select = ["E", "F", "W"]
+ignore = [
+    "E501",  # line too long — content strings intentionally exceed 100 chars
+    "W505",  # doc line too long
+]
+
+[lint.per-file-ignores]
+# ML convention: X_train, X_test etc. are uppercase by standard
+"content/modelisation.py" = ["F841"]
