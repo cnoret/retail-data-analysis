@@ -120,7 +120,7 @@ def preparation():
         col2.metric("Columns", merged.shape[1])
         col3.metric("Duplicates", merged.duplicated().sum())
 
-        st.dataframe(merged.head(), use_container_width=True)
+        st.dataframe(merged.head(), width='stretch')
 
         remaining_merged = merged.isnull().sum()
         remaining_merged = remaining_merged[remaining_merged > 0]

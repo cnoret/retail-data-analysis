@@ -46,7 +46,7 @@ def visualisation():
         height=700,
     )
     fig.update_layout(margin=dict(l=0, r=0))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     with st.expander("Key insights"):
         st.write("""
@@ -74,7 +74,7 @@ def visualisation():
         color_discrete_sequence=['#636EFA'],
     )
     fig.update_layout(bargap=0.05)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     with st.expander("Key insights"):
         st.write("""
@@ -108,7 +108,7 @@ def visualisation():
         color_continuous_scale='Blues',
     )
     fig.update_layout(coloraxis_showscale=False, xaxis={'categoryorder': 'total descending'})
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     with st.expander("Key insights"):
         st.write("""
@@ -138,7 +138,7 @@ def visualisation():
         labels={'Weekly_Sales': 'Total Sales ($)', 'Date': ''},
     )
     fig.update_traces(line_color='#636EFA')
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     with st.expander("Key insights"):
         st.write("""
@@ -166,7 +166,7 @@ def visualisation():
         color_discrete_map={False: '#636EFA', True: '#EF553B'},
     )
     fig.update_layout(showlegend=False)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     with st.expander("Key insights"):
         st.write("""

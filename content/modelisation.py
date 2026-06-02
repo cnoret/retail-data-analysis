@@ -89,7 +89,7 @@ def modelisation():
             pd.DataFrame.from_dict(
                 FEATURE_LABELS, orient='index', columns=['Description']
             ),
-            use_container_width=True,
+            width='stretch',
         )
     with col2:
         st.info(
@@ -131,7 +131,7 @@ def modelisation():
         )
         st.dataframe(
             pd.DataFrame(X_train_scaled[:5], columns=X_train.columns).round(3),
-            use_container_width=True,
+            width='stretch',
         )
 
     st.write("---")
@@ -187,7 +187,7 @@ def modelisation():
         line=dict(color="red", dash="dash", width=1.5),
     )
     fig.update_layout(height=450)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     # Feature importance (RF only)
     if model_choice == "Random Forest Regressor":
@@ -206,7 +206,7 @@ def modelisation():
             color_continuous_scale="Blues",
         )
         fig.update_layout(coloraxis_showscale=False, height=380)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     st.write("---")
 
@@ -226,7 +226,7 @@ def modelisation():
         .highlight_max(axis=0, subset=["R²"], color="#d4edda")
         .highlight_min(axis=0, subset=["RMSE ($)", "MAE ($)"], color="#d4edda")
     )
-    st.dataframe(styled, use_container_width=True)
+    st.dataframe(styled, width='stretch')
 
     st.write("---")
 

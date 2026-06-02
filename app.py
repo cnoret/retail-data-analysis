@@ -74,8 +74,8 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     col1, col2 = st.columns(2)
-    col1.link_button("LinkedIn", "https://www.linkedin.com/in/christophenoret", use_container_width=True)
-    col2.link_button("GitHub", "https://github.com/cnoret", use_container_width=True)
+    col1.link_button("LinkedIn", "https://www.linkedin.com/in/christophenoret", width='stretch')
+    col2.link_button("GitHub", "https://github.com/cnoret", width='stretch')
 
 ## Main Menu
 if choice == "Introduction":

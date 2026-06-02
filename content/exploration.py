@@ -30,7 +30,7 @@ def _dataset_section(name, df, description, column_descriptions=None):
             for col, desc in column_descriptions.items():
                 st.markdown(f"- **{col}:** {desc}")
 
-    st.dataframe(df.head(), use_container_width=True)
+    st.dataframe(df.head(), width='stretch')
 
     missing = df.isna().sum()
     missing = missing[missing > 0]
@@ -112,7 +112,7 @@ def exploration():
     col3.metric("Departments", df["Dept"].nunique())
     col4.metric("Weeks covered", df["Date"].nunique())
 
-    st.dataframe(df.head(), use_container_width=True)
+    st.dataframe(df.head(), width='stretch')
     st.info(
         "This merged dataset is the single source used for all subsequent analysis and modeling steps.",
         icon="ℹ️",
