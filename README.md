@@ -55,6 +55,7 @@ retail-data-analysis/
 │   ├── modelisation.py
 │   └── resources.py
 ├── data/                   # CSV datasets
+├── models/                 # Pre-trained models (joblib)
 ├── images/                 # UI assets
 └── requirements.txt
 ```
@@ -64,9 +65,9 @@ retail-data-analysis/
 | Model | R² | RMSE |
 | --- | --- | --- |
 | Linear Regression | ~0.06 | ~$22,000 |
-| Random Forest | ~0.97 | ~$4,000 |
+| Random Forest (`n=20, depth=10`) | ~0.84 | ~$9,000 |
 
-Random Forest significantly outperforms Linear Regression because `Store` and `Dept` are categorical identifiers, tree-based splits handle them naturally while linear models treat them as continuous values.
+Random Forest significantly outperforms Linear Regression because `Store` and `Dept` are categorical identifiers — tree-based splits handle them naturally while linear models treat them as continuous values. RF parameters are tuned for Streamlit Cloud memory constraints.
 
 ## License
 
