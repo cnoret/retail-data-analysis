@@ -22,14 +22,25 @@ with st.sidebar:
     st.image("images/trolley.png")
     st.header("Walmart Sales Forecasting")
     choice = option_menu(
-        menu_title = "Summary",
-        options = ["Introduction",
-                   "Data Exploration",
-                   "Data Processing",
-                   "Analysis and visualization",
-                   "Modeling and prediction",
-                   "Resources"],
-        default_index = 0)
+        menu_title="Summary",
+        options=[
+            "Introduction",
+            "Data Exploration",
+            "Data Processing",
+            "Analysis and visualization",
+            "Modeling and prediction",
+            "Resources",
+        ],
+        icons=[
+            "house",
+            "search",
+            "gear",
+            "bar-chart",
+            "cpu",
+            "book",
+        ],
+        default_index=0,
+    )
 
     # Author
     st.header("Author :")
