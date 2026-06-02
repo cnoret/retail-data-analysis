@@ -17,6 +17,31 @@ from content.resources import resources
 ## Page title & favicon
 st.set_page_config(page_title="Walmart Sales Forecasting", page_icon="images/favicon.png")
 
+## Global CSS
+st.markdown("""
+<style>
+/* KPI metric cards */
+[data-testid="stMetric"] {
+    background-color: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 10px;
+    padding: 16px 20px;
+}
+[data-testid="stMetricLabel"] {
+    font-size: 0.82rem;
+    color: #64748B;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+[data-testid="stMetricValue"] {
+    font-size: 1.8rem;
+    color: #0071CE;
+    font-weight: 700;
+}
+</style>
+""", unsafe_allow_html=True)
+
 ## Sidebar menu
 with st.sidebar:
     st.image("images/trolley.png", width=72)

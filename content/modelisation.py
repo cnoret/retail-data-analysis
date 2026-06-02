@@ -126,7 +126,9 @@ def modelisation():
         col1, col2 = st.columns(2)
         col1.metric("Training samples", f"{len(X_train):,}")
         col2.metric("Test samples", f"{len(X_test):,}")
-        st.caption("80/20 split · `Type` label-encoded · all features standardized (StandardScaler)")  # noqa: E501
+        st.caption(
+            "80/20 split · `Type` label-encoded · all features standardized (StandardScaler)"
+        )
         st.dataframe(
             pd.DataFrame(X_train_scaled[:5], columns=X_train.columns).round(3),
             use_container_width=True,
@@ -256,4 +258,26 @@ def modelisation():
     prediction = model.predict(input_scaled)[0]
 
     st.write("")
-    st.success(f"**Predicted Weekly Sales: ${prediction:,.2f}**", icon="🤖")
+    st.markdown(
+        f"""
+        <div style="
+            background: linear-gradient(135deg, #0071CE 0%, #005BA1 100%);
+            border-radius: 14px;
+            padding: 32px 24px;
+            text-align: center;
+            margin-top: 16px;
+        ">
+            <p style="color:#BFDBFE; font-size:0.85rem; font-weight:600;
+                      text-transform:uppercase; letter-spacing:0.08em; margin:0 0 8px 0;">
+                Predicted Weekly Sales
+            </p>
+            <p style="color:#FFFFFF; font-size:3rem; font-weight:800; margin:0; line-height:1.1;">
+                ${prediction:,.0f}
+            </p>
+            <p style="color:#93C5FD; font-size:0.8rem; margin:8px 0 0 0;">
+                {model_choice} · Store {store} · Dept {dept}
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
