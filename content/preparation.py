@@ -5,22 +5,32 @@ Page : Data Processing
 import streamlit as st
 import pandas as pd
 
+
+@st.cache_data
+def load_raw_data():
+    return (
+        pd.read_csv('data/features.csv'),
+        pd.read_csv('data/sales.csv'),
+        pd.read_csv('data/stores.csv'),
+    )
+
+
 def preparation():
     "Data Processing content page"
-    
+
     st.title("Data Processing")
     st.info("Let's clean, transform, and prepare the dataset for analysis !", icon = "🔧")
-    
+
     # Load the datasets
     st.subheader("Loading data")
-    
+
     try:
-        features = pd.read_csv('data/features.csv')
-        sales = pd.read_csv('data/sales.csv')
-        stores = pd.read_csv('data/stores.csv')
-        
+        features, sales, stores = load_raw_data()
+        features = features.copy()
+        sales = sales.copy()
+
         st.success("features.csv, sales.csv, stores.csv successfully loaded!", icon = "✅")
-        
+
     except FileNotFoundError as e:
         st.error(f"The specified file cannot be found: {str(e)}")
         return

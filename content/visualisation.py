@@ -8,6 +8,12 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
+
+@st.cache_data
+def load_viz_data():
+    return pd.read_csv('data/merged_retail_data.csv')
+
+
 def visualisation():
     "Analysis and visualization content page"
 
@@ -16,7 +22,7 @@ def visualisation():
     # Load the data
     st.subheader("Loading merged_retail_data.csv")
     try:
-        merged_data = pd.read_csv('data/merged_retail_data.csv')
+        merged_data = load_viz_data()
         st.success("Data successfully loaded!", icon = "✅")
     except Exception as e:
         st.error(f"Failed to load data: {str(e)}")

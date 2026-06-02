@@ -5,38 +5,35 @@ Page : Data Exploration
 import streamlit as st
 import pandas as pd
 
+
+@st.cache_data
+def load_exploration_data():
+    df = pd.read_csv('data/merged_retail_data.csv')
+    stores = pd.read_csv('data/stores.csv')
+    sales = pd.read_csv('data/sales.csv')
+    features = pd.read_csv('data/features.csv')
+    return df, stores, sales, features
+
+
 def exploration():
     "Data Exploration content page"
     st.title("Data Exploration")
-    st.info("The data sets are very clean and well structured. Only the features.csv file shows missing values, particularly in the “Markdown” columns, representing weeks when there were simply no promotions running.", icon='✨')
+    st.info('The data sets are very clean and well structured. Only the features.csv file shows missing values, particularly in the "Markdown" columns, representing weeks when there were simply no promotions running.', icon='✨')
 
-    with st.spinner('Loading Data...⏳'):
-        try:
-            # Reading .csv files
-            df = pd.read_csv('data/merged_retail_data.csv')
-            stores = pd.read_csv('data/stores.csv')
-            sales = pd.read_csv('data/sales.csv')
-            features = pd.read_csv('data/features.csv')
-
-            # Calculating the percentage of missing values in a dataframe
-            nan_info = {name: (data.isna().sum(), (data.isna().mean() * 100).round(2)) 
-                        for name, data in zip(['Sales', 'Stores', 'Features', 'Merged Data'], [sales, stores, features, df])}
-
-        except pd.errors.EmptyDataError as e:
-            st.error(f"An error occurred while reading the CSV file: {str(e)}")
-            return
-
-        except FileNotFoundError as e:
-            st.error(f"The specified file cannot be found: {str(e)}")
-            return
-
-        except KeyError as e:
-            st.error(f"The specified column cannot be found in the DataFrame: {str(e)}")
-            return
-
-        except Exception as e:
-            st.error(f"An unexpected error has occurred: {str(e)}")
-            return
+    try:
+        df, stores, sales, features = load_exploration_data()
+    except pd.errors.EmptyDataError as e:
+        st.error(f"An error occurred while reading the CSV file: {str(e)}")
+        return
+    except FileNotFoundError as e:
+        st.error(f"The specified file cannot be found: {str(e)}")
+        return
+    except KeyError as e:
+        st.error(f"The specified column cannot be found in the DataFrame: {str(e)}")
+        return
+    except Exception as e:
+        st.error(f"An unexpected error has occurred: {str(e)}")
+        return
 
     # Display datasets overview with metrics and descriptions
     
