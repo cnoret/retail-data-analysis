@@ -4,17 +4,29 @@ Page : Modeling and prediction
 
 import streamlit as st
 import pandas as pd
+import numpy as np
+import plotly.express as px
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score
-import numpy as np
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
 FEATURE_COLS = [
     'Store', 'Dept', 'IsHoliday_x', 'Temperature',
     'Fuel_Price', 'CPI', 'Unemployment', 'Type',
 ]
+
+FEATURE_LABELS = {
+    'Store': 'Store ID',
+    'Dept': 'Department',
+    'IsHoliday_x': 'Holiday week',
+    'Temperature': 'Temperature (°F)',
+    'Fuel_Price': 'Fuel Price ($/gal)',
+    'CPI': 'Consumer Price Index',
+    'Unemployment': 'Unemployment rate',
+    'Type': 'Store type (encoded)',
+}
 
 
 @st.cache_data
@@ -27,7 +39,9 @@ def get_model_pipeline(model_choice):
     data = pd.read_csv('data/merged_retail_data.csv')
     X = data[FEATURE_COLS].copy()
     y = data['Weekly_Sales']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
     X_train = X_train.copy()
     X_test = X_test.copy()
     X_train.loc[:, 'Type'] = X_train['Type'].astype('category').cat.codes
@@ -43,117 +57,203 @@ def get_model_pipeline(model_choice):
     return model, scaler, X_train, X_test, y_train, y_test, X_train_scaled, X_test_scaled
 
 
+def _compute_metrics(y_true, y_pred):
+    return {
+        "R²": round(r2_score(y_true, y_pred), 4),
+        "RMSE ($)": round(np.sqrt(mean_squared_error(y_true, y_pred)), 2),
+        "MAE ($)": round(mean_absolute_error(y_true, y_pred), 2),
+    }
+
+
 def modelisation():
     "Modeling page content"
 
-    st.title("Weekly Sales Prediction")
-    st.info("Let's clean, transform, and prepare the dataset for analysis !", icon="🔧")
+    st.title("Modeling & Prediction")
+    st.caption(
+        "Training machine learning models to forecast weekly department-level sales "
+        "and evaluating their performance on held-out data."
+    )
 
-    st.write("---")
-
-    # Load the data
-    st.subheader("Loading data")
     try:
-        data = load_model_data()
-        st.success("merged_retail_data.csv successfully loaded!", icon="✅")
+        load_model_data()
     except Exception as e:
         st.error(f"Failed to load data: {str(e)}")
         return
 
+    # ── 1. Feature selection ──────────────────────────────────────────────────
+    st.subheader("1 · Feature Selection")
+
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.dataframe(
+            pd.DataFrame.from_dict(
+                FEATURE_LABELS, orient='index', columns=['Description']
+            ),
+            use_container_width=True,
+        )
+    with col2:
+        st.info(
+            "**Excluded features**\n\n"
+            "- **Date** — temporal index, seasonal effects captured via `IsHoliday` "
+            "and economic indicators.\n"
+            "- **MarkDown1–5** — sparse (only available post Nov 2011) and weakly "
+            "correlated with sales in our analysis.",
+            icon="ℹ️",
+        )
+
     st.write("---")
 
-    ## Data Preprocessing
-    st.subheader("Data Preprocessing")
+    # ── 2. Model training ─────────────────────────────────────────────────────
+    st.subheader("2 · Model Training")
 
-    st.write("""
-    **Why some features were not chosen:**
-    - **Date**: The `Date` feature was not directly used in the model because it is a temporal feature that doesn't contribute directly to the prediction of sales. However, seasonal effects could be captured indirectly by features like `IsHoliday`, `Temperature`, and `Fuel_Price`.
-    - **MarkDown1-5**: These features represent promotional markdowns, but they were excluded as they are not always available and might introduce noise rather than improving the model's performance. In specific scenarios, however, these could be revisited for a different modeling approach focusing on promotional impacts.
-    """)
+    model_choice = st.selectbox(
+        "Select a model:",
+        ("Linear Regression", "Random Forest Regressor"),
+    )
 
-    st.write("**Selecting relevant features :**")
-    st.dataframe(data[FEATURE_COLS].head())
-
-    st.write("**Target variable :**")
-    st.write(data['Weekly_Sales'])
-
-    st.write("---")
-
-    # Model Selection and Training
-    st.subheader("Model Selection and Training")
-
-    model_choice = st.selectbox("Choose a model to train :", ("Linear Regression", "Random Forest Regressor"))
-
-    if model_choice == "Random Forest Regressor":
-        label = f"Training the {model_choice} model... (~ 2 minutes)"
-    else:
-        label = f"Training the {model_choice} model..."
+    label = (
+        f"Training {model_choice}… (~2 min)"
+        if model_choice == "Random Forest Regressor"
+        else f"Training {model_choice}…"
+    )
     with st.spinner(label):
         pipeline = get_model_pipeline(model_choice)
-    model, scaler, X_train, X_test, y_train, y_test, X_train_scaled, X_test_scaled = pipeline
+    model, scaler, X_train, X_test, _, y_test, X_train_scaled, X_test_scaled = pipeline
 
-    st.success(f"{model_choice} model trained successfully!", icon="✅")
+    st.success(f"{model_choice} trained on {len(X_train):,} samples.", icon="✅")
 
-    st.info("**Splitting the data into training and testing sets (80% / 20%)**", icon="🔧")
-    st.write(f"**Training set shape:** {X_train.shape}")
-    st.write(f"**Testing set shape:** {X_test.shape}")
-    st.write("**Training features sample:**")
-    st.dataframe(X_train[:5])
-
-    st.write("---")
-
-    st.info("**Encoding categorical variables**", icon="🔧")
-    st.write("**Encoded training features sample:**")
-    st.dataframe(X_train[:5])
+    with st.expander("Preprocessing details"):
+        col1, col2 = st.columns(2)
+        col1.metric("Training samples", f"{len(X_train):,}")
+        col2.metric("Test samples", f"{len(X_test):,}")
+        st.caption("80/20 split · `Type` label-encoded · all features standardized (StandardScaler)")  # noqa: E501
+        st.dataframe(
+            pd.DataFrame(X_train_scaled[:5], columns=X_train.columns).round(3),
+            use_container_width=True,
+        )
 
     st.write("---")
 
-    st.info("**Applying feature scaling to standardize the numerical features.**", icon="🔧")
-    st.write("**Scaled training features sample:**")
-    st.dataframe(pd.DataFrame(X_train_scaled, columns=X_train.columns).head())
-
-    st.write("---")
-
-    # Model Evaluation
-    st.subheader("Model Evaluation")
+    # ── 3. Evaluation ─────────────────────────────────────────────────────────
+    st.subheader("3 · Model Evaluation")
 
     y_pred = model.predict(X_test_scaled)
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-    r2 = r2_score(y_test, y_pred)
+    metrics = _compute_metrics(y_test, y_pred)
 
-    st.write(f"**R-squared (R²):** {r2:.2f}")
-    st.write(f"**Root Mean Squared Error (RMSE):** {rmse:.2f}")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("R²", f"{metrics['R²']:.4f}")
+    col2.metric("RMSE", f"${metrics['RMSE ($)']:,.0f}")
+    col3.metric("MAE", f"${metrics['MAE ($)']:,.0f}")
 
-    st.info("""
-    **Explanation of metrics:**
-    - **Root Mean Squared Error (RMSE):** The RMSE is the square root of the MSE and provides an error metric in the same units as the target variable (sales).
-    - **R-squared (R²):** R² represents the proportion of the variance in the dependent variable (weekly sales) that is predictable from the independent variables. An R² close to 1 indicates that the model explains most of the variance in the outcome.
-    """, icon='✨')
+    if model_choice == "Linear Regression" and metrics["R²"] < 0.2:
+        st.warning(
+            "Linear Regression performs poorly here (R²≈0.06) because `Store` and `Dept` "
+            "are numeric IDs — LR treats them as continuous ordered values, which is incorrect. "
+            "Random Forest handles this naturally through non-linear splits. "
+            "Switch to **Random Forest** to see the difference.",
+            icon="⚠️",
+        )
+
+    with st.expander("What do these metrics mean?"):
+        st.write("""
+        - **R²** — proportion of sales variance explained by the model. 1.0 is perfect.
+        - **RMSE** — typical prediction error in dollars (penalises large errors more).
+        - **MAE** — average absolute error in dollars (more robust to outliers).
+        """)
+
+    st.write("")
+
+    # Actual vs Predicted
+    rng = np.random.default_rng(42)
+    idx = rng.choice(len(y_test), size=min(2000, len(y_test)), replace=False)
+    scatter_df = pd.DataFrame({
+        "Actual ($)": np.array(y_test)[idx],
+        "Predicted ($)": y_pred[idx],
+    })
+    max_val = float(scatter_df.max().max())
+
+    fig = px.scatter(
+        scatter_df,
+        x="Actual ($)",
+        y="Predicted ($)",
+        opacity=0.4,
+        title="Actual vs Predicted Weekly Sales",
+        color_discrete_sequence=["#636EFA"],
+    )
+    fig.add_shape(
+        type="line", x0=0, y0=0, x1=max_val, y1=max_val,
+        line=dict(color="red", dash="dash", width=1.5),
+    )
+    fig.update_layout(height=450)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Feature importance (RF only)
+    if model_choice == "Random Forest Regressor":
+        importance_df = pd.DataFrame({
+            "Feature": FEATURE_COLS,
+            "Importance": model.feature_importances_,
+        }).sort_values("Importance")
+
+        fig = px.bar(
+            importance_df,
+            x="Importance",
+            y="Feature",
+            orientation="h",
+            title="Feature Importance (Random Forest)",
+            color="Importance",
+            color_continuous_scale="Blues",
+        )
+        fig.update_layout(coloraxis_showscale=False, height=380)
+        st.plotly_chart(fig, use_container_width=True)
 
     st.write("---")
 
-    # Predictions
-    st.subheader('Make your own "Weekly_Sales" predictions !')
+    # ── 4. Model comparison ───────────────────────────────────────────────────
+    st.subheader("4 · Model Comparison")
 
-    st.write("Input the following features to predict the Weekly Sales:")
-    store = st.number_input("Store", min_value=1, max_value=45)
-    dept = st.number_input("Department", min_value=1)
-    is_holiday = st.selectbox("Is Holiday?", [0, 1])
-    temperature = st.number_input("Temperature")
-    fuel_price = st.number_input("Fuel Price")
-    cpi = st.number_input("CPI")
-    unemployment = st.number_input("Unemployment")
-    store_type = st.selectbox("Store Type", [0, 1, 2])
+    rows = []
+    for choice in ["Linear Regression", "Random Forest Regressor"]:
+        with st.spinner(f"Evaluating {choice}…"):
+            m, _, _, _, _, y_t, _, x_t_sc = get_model_pipeline(choice)
+        y_p = m.predict(x_t_sc)
+        rows.append({"Model": choice, **_compute_metrics(y_t, y_p)})
+
+    comparison = pd.DataFrame(rows).set_index("Model")
+    styled = (
+        comparison.style
+        .highlight_max(axis=0, subset=["R²"], color="#d4edda")
+        .highlight_min(axis=0, subset=["RMSE ($)", "MAE ($)"], color="#d4edda")
+    )
+    st.dataframe(styled, use_container_width=True)
+
+    st.write("---")
+
+    # ── 5. Make a prediction ──────────────────────────────────────────────────
+    st.subheader("5 · Make a Prediction")
+    st.caption("Use the trained model to predict weekly sales for any store and department.")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        store = st.number_input("Store (1–45)", min_value=1, max_value=45, value=20)
+        dept = st.number_input("Department", min_value=1, max_value=99, value=1)
+        is_holiday = st.selectbox(
+            "Holiday week?", [False, True], format_func=lambda x: "Yes" if x else "No"
+        )
+        store_type = st.selectbox("Store type", ["A", "B", "C"])
+    with col2:
+        temperature = st.number_input("Temperature (°F)", value=60.0)
+        fuel_price = st.number_input("Fuel Price ($/gal)", value=3.50)
+        cpi = st.number_input("CPI", value=210.0)
+        unemployment = st.number_input("Unemployment (%)", value=8.0)
+
+    type_code = {"A": 0, "B": 1, "C": 2}[store_type]
 
     input_data = pd.DataFrame(
-        [[store, dept, is_holiday, temperature, fuel_price, cpi, unemployment, store_type]],
+        [[store, dept, int(is_holiday), temperature, fuel_price, cpi, unemployment, type_code]],
         columns=FEATURE_COLS,
     )
-    input_data_scaled = scaler.transform(input_data)
-    prediction = model.predict(input_data_scaled)
+    input_scaled = scaler.transform(input_data)
+    prediction = model.predict(input_scaled)[0]
 
-    st.write("**Selected user data:**")
-    st.dataframe(input_data)
-    st.write("**Scaled user data:**")
-    st.dataframe(pd.DataFrame(input_data_scaled, columns=X_train.columns).head())
-    st.success(f"**Predicted Weekly Sales:** ${prediction[0]:,.2f}", icon="🤖")
+    st.write("")
+    st.success(f"**Predicted Weekly Sales: ${prediction:,.2f}**", icon="🤖")
