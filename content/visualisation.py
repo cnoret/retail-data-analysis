@@ -1,5 +1,5 @@
 """
-Page : Analysis and visualization
+Page : Visualization
 """
 
 import streamlit as st
@@ -23,7 +23,7 @@ def prepare_correlation_data(df):
 
 
 def visualisation():
-    "Analysis and visualization content page"
+    "Visualization content page"
 
     st.title("Analysis & Visualization")
 

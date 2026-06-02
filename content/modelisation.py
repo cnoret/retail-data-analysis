@@ -1,5 +1,5 @@
 """
-Page : Modeling and prediction
+Page : Modeling
 """
 
 import json
