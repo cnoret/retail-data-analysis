@@ -26,7 +26,7 @@ Predicting weekly department-level sales across 45 Walmart stores using machine 
 | Layer | Libraries |
 | --- | --- |
 | Data | Pandas, NumPy |
-| ML | Scikit-Learn (LinearRegression, RandomForestRegressor) |
+| ML | Scikit-Learn (LinearRegression, RandomForestRegressor) · Joblib (model persistence) |
 | Visualization | Plotly |
 | App | Streamlit |
 | Deployment | Streamlit Cloud |

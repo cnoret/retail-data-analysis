@@ -36,6 +36,7 @@ def resources():
 - [Pandas](https://pandas.pydata.org/) — data manipulation
 - [NumPy](https://numpy.org/) — numerical computing
 - [Scikit-Learn](https://scikit-learn.org/) — modeling & preprocessing
+- [Joblib](https://joblib.readthedocs.io/) — model persistence
         """)
 
     with col2:

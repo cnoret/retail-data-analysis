@@ -1,0 +1,9 @@
+{
+  "model": "Random Forest Regressor",
+  "trained_at": "2026-06-02T19:31:22",
+  "n_train": 337256,
+  "n_test": 84314,
+  "r2": 0.941,
+  "rmse": 5546.45,
+  "mae": 1925.62
+}
