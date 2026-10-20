@@ -38,7 +38,7 @@ jobs:
       - name: Check syntax
         run: python -m compileall -q content/ app.py scripts/
       - name: Import app modules
-        run: python -c "import app; import content.modelisation, content.exploration, content.preparation, content.visualisation, content.intro, content.resources"
+        run: python -c "import app; import content.modelisation, content.dashboard, content.exploration, content.preparation, content.visualisation, content.intro, content.resources"
       - name: Check dependency consistency
         run: pip check
 

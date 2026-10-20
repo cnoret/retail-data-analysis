@@ -8,6 +8,7 @@ from streamlit_option_menu import option_menu
 
 ## Importing pages
 from content.intro import introduction
+from content.dashboard import dashboard
 from content.exploration import exploration
 from content.preparation import preparation
 from content.visualisation import visualisation
@@ -50,6 +51,7 @@ with st.sidebar:
         menu_title="Summary",
         options=[
             "Introduction",
+            "Dashboard",
             "Data Exploration",
             "Data Processing",
             "Visualization",
@@ -58,6 +60,7 @@ with st.sidebar:
         ],
         icons=[
             "house",
+            "speedometer2",
             "search",
             "gear",
             "bar-chart",
@@ -80,6 +83,9 @@ with st.sidebar:
 ## Main Menu
 if choice == "Introduction":
     introduction()
+
+elif choice == "Dashboard":
+    dashboard()
 
 elif choice == "Data Exploration":
     exploration()

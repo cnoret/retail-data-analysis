@@ -15,6 +15,7 @@ Predicting weekly department-level sales across 45 Walmart stores using machine 
 
 ## Features
 
+- **Dashboard**: one-screen executive summary (KPIs, sales trend, top stores, model takeaway)
 - **Data Exploration**: interactive overview of the three source datasets with missing value analysis
 - **Data Processing**: walkthrough of the cleaning/merge pipeline that produced the committed merged CSV
 - **Analysis & Visualization**: interactive Plotly charts (correlation, sales distribution, store rankings, trends, holidays)
@@ -57,7 +58,7 @@ Writes joblib artifacts and `*_info.json` under `models/`.
 ```text
 retail-data-analysis/
 ├── app.py                         # Streamlit entry point
-├── content/                       # App pages
+├── content/                       # App pages (incl. dashboard.py)
 ├── data/                          # Raw CSVs + merged_retail_data.csv
 ├── models/                        # Pre-trained joblib artifacts
 ├── scripts/train_models.py        # Retrain helper

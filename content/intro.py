@@ -47,6 +47,7 @@ def introduction():
 
     st.write("")
     st.info(
-        "Navigate through the sections using the sidebar to explore the full analysis.",
+        "Start with **Dashboard** for a one-screen summary, then dig into Exploration, "
+        "Visualization, and Modeling via the sidebar.",
         icon="👈",
     )
