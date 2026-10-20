@@ -39,10 +39,9 @@ def introduction():
     st.subheader("Objectives")
     st.write(
         """
-        1. **Sales Forecasting** — Predict weekly sales per store and department using historical data and external factors.
-        2. **Feature Impact Analysis** — Quantify the effect of promotions, holidays, and economic indicators on sales.
-        3. **Store Performance Comparison** — Identify top-performing stores and the drivers behind their results.
-        4. **Anomaly Detection** — Surface unexpected sales spikes or drops and explore their causes.
+        1. **Sales Forecasting**: predict weekly sales per store and department using historical data and external factors.
+        2. **Feature Impact Analysis**: quantify the effect of holidays and economic indicators on sales.
+        3. **Store Performance Comparison**: identify top-performing stores and the drivers behind their results.
         """
     )
 
