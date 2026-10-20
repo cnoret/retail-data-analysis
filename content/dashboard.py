@@ -2,15 +2,9 @@
 Page : Dashboard (executive summary)
 """
 
-import json
-import os
-
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-
-RESIDUAL_INFO = "models/residual_random_forest_info.json"
-BASELINE_R2 = 0.9424  # Store×Dept mean on temporal hold-out (see Modeling)
 
 
 @st.cache_data
@@ -20,19 +14,11 @@ def _load_dashboard_data():
     return df
 
 
-@st.cache_data
-def _load_residual_info():
-    if not os.path.exists(RESIDUAL_INFO):
-        return None
-    with open(RESIDUAL_INFO, encoding="utf-8") as f:
-        return json.load(f)
-
-
 def dashboard():
-    "One-screen executive summary for recruiters."
+    "One-screen executive summary for stakeholders / recruiters."
 
     st.title("Dashboard")
-    st.caption("Executive snapshot: data scale, sales pulse, and the model that beats the baseline.")
+    st.caption("Executive snapshot: scale, seasonality, store performance, holiday effect.")
 
     try:
         data = _load_dashboard_data()
@@ -40,20 +26,21 @@ def dashboard():
         st.error(f"Failed to load data: {e}")
         return
 
-    info = _load_residual_info()
-
     # ── KPIs ──────────────────────────────────────────────────────────────────
     total_revenue = data["Weekly_Sales"].sum()
-    n_stores = data["Store"].nunique()
+    n_stores = int(data["Store"].nunique())
+    n_depts = int(data["Dept"].nunique())
+    holiday_col = "IsHoliday_x" if "IsHoliday_x" in data.columns else "IsHoliday"
+    is_holiday = data[holiday_col].astype(bool)
+    med_h = data.loc[is_holiday, "Weekly_Sales"].median()
+    med_nh = data.loc[~is_holiday, "Weekly_Sales"].median()
+    holiday_lift_pct = (med_h / med_nh - 1) * 100 if med_nh else 0
+
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total revenue", f"${total_revenue / 1e9:.1f} B")
     col2.metric("Stores", f"{n_stores}")
-    if info:
-        col3.metric("Residual RF R²", f"{info['r2']:.2f}")
-        col4.metric("Residual RF RMSE", f"${info['rmse']:,.0f}")
-    else:
-        col3.metric("Residual RF R²", "n/a")
-        col4.metric("Residual RF RMSE", "n/a")
+    col3.metric("Departments", f"{n_depts}")
+    col4.metric("Holiday median lift", f"+{holiday_lift_pct:.0f}%")
 
     st.write("---")
 
@@ -104,21 +91,19 @@ def dashboard():
 
     st.write("---")
 
-    # ── Model takeaway + CTA ──────────────────────────────────────────────────
-    if info:
-        delta = info["r2"] - BASELINE_R2
-        st.success(
-            f"**Residual Random Forest** beats the Store×Dept mean baseline on a temporal "
-            f"hold-out (cutoff {info['cutoff_date']}): "
-            f"R² **{info['r2']:.4f}** vs ~{BASELINE_R2:.2f} (Δ +{delta:.3f}), "
-            f"RMSE **${info['rmse']:,.0f}**.",
-            icon="🏆",
-        )
-    else:
-        st.info("Train models via `python scripts/train_models.py` to populate model KPIs.")
+    st.subheader("Key takeaways")
+    st.markdown(
+        f"""
+- **Seasonality** is the main time pattern: sharp peaks near Thanksgiving / Christmas.
+- **Holiday weeks** show a higher median (+{holiday_lift_pct:.0f}% vs non-holiday).
+- **Store concentration**: top locations drive a large share of total revenue.
+- **Baseline for any forecast**: mean sales by (Store, Dept) already captures most structure
+  (see Modeling annex if relevant).
+        """
+    )
 
     st.info(
-        "Details and live forecasts are on **Modeling**. "
-        "Deeper charts are on **Visualization**.",
+        "Deeper charts → **Visualization**. Data quality & sources → **Exploration**. "
+        "Forecasting experiments → **Modeling** (optional).",
         icon="👉",
     )

@@ -9,7 +9,7 @@ def resources():
     "Resources and tech stack page"
 
     st.title("Stack & Resources")
-    st.caption("Libraries, tools, and data sources used in this project.")
+    st.caption("Analysis stack, dashboarding tools, and data source.")
 
     st.write("---")
 
@@ -31,12 +31,11 @@ def resources():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("**Data & ML**")
+        st.markdown("**Data analysis**")
         st.markdown("""
 - [Pandas](https://pandas.pydata.org/): data manipulation
 - [NumPy](https://numpy.org/): numerical computing
-- [Scikit-Learn](https://scikit-learn.org/): modeling & preprocessing
-- [Joblib](https://joblib.readthedocs.io/): model persistence
+- [Scikit-Learn](https://scikit-learn.org/) / [Joblib](https://joblib.readthedocs.io/): optional forecasting annex
         """)
 
     with col2:
@@ -56,14 +55,14 @@ def resources():
 
     with col1:
         st.markdown("""
-- [Jupyter Notebook](https://jupyter.org/) — exploratory analysis
-- [VS Code](https://code.visualstudio.com/) — development
+- [Jupyter Notebook](https://jupyter.org/): exploratory analysis
+- [VS Code](https://code.visualstudio.com/): development
         """)
 
     with col2:
         st.markdown("""
-- [Git & GitHub](https://github.com/cnoret/retail-data-analysis) — version control
-- [Streamlit Cloud](https://streamlit.io/cloud) — deployment
+- [Git & GitHub](https://github.com/cnoret/retail-data-analysis): version control
+- [Streamlit Cloud](https://streamlit.io/cloud): deployment
         """)
 
     st.write("---")

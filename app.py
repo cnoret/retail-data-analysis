@@ -16,7 +16,7 @@ from content.modelisation import modelisation
 from content.resources import resources
 
 ## Page title & favicon
-st.set_page_config(page_title="Walmart Sales Forecasting", page_icon="images/favicon.png")
+st.set_page_config(page_title="Walmart Retail Sales Analysis", page_icon="images/favicon.png")
 
 ## Global CSS
 st.markdown("""
@@ -46,7 +46,7 @@ st.markdown("""
 ## Sidebar menu
 with st.sidebar:
     st.image("images/trolley.png", width=72)
-    st.header("Walmart Sales Forecasting")
+    st.header("Walmart Sales Analysis")
     choice = option_menu(
         menu_title="Summary",
         options=[

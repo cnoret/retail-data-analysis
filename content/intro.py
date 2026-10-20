@@ -14,8 +14,10 @@ def introduction():
         caption="Daniel Orth (www.flickr.com/photos/danorth1/1176509527), CC BY-ND 2.0 | Flickr",
     )
 
-    st.title("Walmart Sales Forecasting")
-    st.caption("Predicting weekly retail sales across 45 stores using machine learning")
+    st.title("Walmart Retail Sales Analysis")
+    st.caption(
+        "Explore weekly sales across 45 stores: KPIs, seasonality, store performance, and data quality"
+    )
 
     st.write("---")
 
@@ -30,24 +32,25 @@ def introduction():
     st.subheader("Project overview")
     st.write(
         """
-        This project analyzes **3 years of anonymized sales data** (Feb 2010 – Oct 2012)
-        from a major US retail chain. The goal is to build models that accurately forecast
-        weekly department-level sales, enabling better inventory planning and marketing decisions.
+        This project analyzes **3 years of anonymized retail sales** (Feb 2010 – Oct 2012)
+        from a major US chain. The focus is **decision-oriented analysis**: understand drivers
+        of weekly department sales, compare stores, and surface seasonality and holiday effects
+        in an interactive app.
         """
     )
 
     st.subheader("Objectives")
     st.write(
         """
-        1. **Sales Forecasting**: predict weekly sales per store and department using historical data and external factors.
-        2. **Feature Impact Analysis**: quantify the effect of holidays and economic indicators on sales.
-        3. **Store Performance Comparison**: identify top-performing stores and the drivers behind their results.
+        1. **Describe the business**: volume, store mix, and department coverage.
+        2. **Explain variation**: holidays, seasonality, and store rankings.
+        3. **Deliver insights in a dashboard** that a non-technical stakeholder can read in one screen.
         """
     )
 
     st.write("")
     st.info(
-        "Start with **Dashboard** for a one-screen summary, then dig into Exploration, "
-        "Visualization, and Modeling via the sidebar.",
+        "Start with **Dashboard** for the executive summary, then Exploration and Visualization. "
+        "**Modeling** is an optional annex (does a forecast beat a simple Store×Dept baseline?).",
         icon="👈",
     )
