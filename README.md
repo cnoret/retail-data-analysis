@@ -18,7 +18,7 @@ Predicting weekly department-level sales across 45 Walmart stores using machine 
 - **Data Exploration** — interactive overview of the three source datasets with missing value analysis
 - **Data Processing** — cleaning pipeline: imputation, date parsing, and dataset merging
 - **Analysis & Visualization** — interactive Plotly charts: correlation matrix, sales distribution, store rankings, time trends, and holiday impact
-- **Modeling** — Linear Regression vs Random Forest with R², RMSE, MAE metrics, Actual vs Predicted chart, and feature importance
+- **Modeling** — temporal hold-out, calendar features (`Week`/`Month`), Store×Dept baseline, Linear Regression (pedagogical foil) vs Random Forest, with R² / RMSE / MAE, Actual vs Predicted, and feature importance
 - **Live Predictions** — input any store/department/context and get an instant sales forecast
 
 ## Tech Stack
@@ -62,12 +62,18 @@ retail-data-analysis/
 
 ## Results
 
-| Model | R² | RMSE |
-| --- | --- | --- |
-| Linear Regression | ~0.06 | ~$22,000 |
-| Random Forest (`n=20, depth=10`) | ~0.84 | ~$9,000 |
+Evaluation uses a **temporal 80/20 split** on unique weeks (train before `2012-04-13`, test after) — not a random split. Features include store/department context, holiday flag, economic indicators, store type, and calendar fields (`Week`, `Month`).
 
-Random Forest significantly outperforms Linear Regression because `Store` and `Dept` are categorical identifiers — tree-based splits handle them naturally while linear models treat them as continuous values. RF parameters are tuned for Streamlit Cloud memory constraints.
+| Model | R² | RMSE | MAE |
+| --- | --- | --- | --- |
+| Baseline (Store × Dept mean) | ~0.94 | ~$5,300 | ~$2,600 |
+| Random Forest (`n=20`, `depth=10`) | ~0.87 | ~$7,800 | ~$4,600 |
+| Linear Regression | ~0.06 | ~$21,000 | ~$15,000 |
+
+**Takeaways**
+- Linear Regression is kept as a **pedagogical foil**: raw numeric `Store`/`Dept` IDs are not linear features, so it collapses.
+- Random Forest handles those IDs via splits and beats LR, but **does not beat the Store×Dept mean baseline** on this hold-out — most signal is identity, not exogenous covariates.
+- RF hyperparameters stay light for Streamlit Cloud memory limits. Next gains need lags or residual modeling on top of the baseline.
 
 ## License
 

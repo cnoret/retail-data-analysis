@@ -14,12 +14,12 @@ import streamlit as st
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 FEATURE_COLS = [
     'Store', 'Dept', 'IsHoliday_x', 'Temperature',
     'Fuel_Price', 'CPI', 'Unemployment', 'Type',
+    'Week', 'Month',
 ]
 
 FEATURE_LABELS = {
@@ -31,9 +31,13 @@ FEATURE_LABELS = {
     'CPI': 'Consumer Price Index',
     'Unemployment': 'Unemployment rate',
     'Type': 'Store type (encoded)',
+    'Week': 'ISO week of year',
+    'Month': 'Month (1–12)',
 }
 
+TYPE_CODES = {'A': 0, 'B': 1, 'C': 2}
 MODELS_DIR = 'models'
+SPLIT_FRAC = 0.8
 
 
 def _model_key(model_choice):
@@ -48,6 +52,20 @@ def _info_path(model_choice):
     return os.path.join(MODELS_DIR, f"{_model_key(model_choice)}_info.json")
 
 
+def _add_calendar_features(df):
+    """Derive Week / Month from Date (in-place safe copy)."""
+    out = df.copy()
+    dates = pd.to_datetime(out['Date'])
+    out['Week'] = dates.dt.isocalendar().week.astype(int)
+    out['Month'] = dates.dt.month.astype(int)
+    return out
+
+
+def _encode_type(series):
+    """Map store Type A/B/C to stable integer codes."""
+    return series.map(TYPE_CODES).astype(int)
+
+
 @st.cache_data
 def load_model_data():
     "Load merged retail dataset."
@@ -56,22 +74,43 @@ def load_model_data():
 
 @st.cache_data
 def _prepare_splits():
-    """Return deterministic train/test splits (random_state=42)."""
-    data = pd.read_csv('data/merged_retail_data.csv')
-    X = data[FEATURE_COLS].copy()
-    y = data['Weekly_Sales']
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+    """Temporal 80/20 split: train on earlier weeks, test on later weeks."""
+    data = _add_calendar_features(pd.read_csv('data/merged_retail_data.csv'))
+    data['Date'] = pd.to_datetime(data['Date'])
+    data['Type'] = _encode_type(data['Type'])
+
+    unique_dates = np.sort(data['Date'].unique())
+    cutoff_idx = int(len(unique_dates) * SPLIT_FRAC)
+    cutoff = unique_dates[cutoff_idx]
+
+    train = data[data['Date'] < cutoff]
+    test = data[data['Date'] >= cutoff]
+
+    X_train = train[FEATURE_COLS].copy()
+    X_test = test[FEATURE_COLS].copy()
+    y_train = train['Weekly_Sales'].copy()
+    y_test = test['Weekly_Sales'].copy()
+    return X_train, X_test, y_train, y_test, pd.Timestamp(cutoff)
+
+
+def _baseline_predict(X_train, y_train, X_test):
+    """Predict mean Weekly_Sales per (Store, Dept) from train; global mean fallback."""
+    means = (
+        pd.DataFrame({
+            'Store': X_train['Store'].values,
+            'Dept': X_train['Dept'].values,
+            'y': y_train.values,
+        })
+        .groupby(['Store', 'Dept'])['y']
+        .mean()
     )
-    X_train = X_train.copy()
-    X_test = X_test.copy()
-    X_train['Type'] = X_train['Type'].astype('category').cat.codes.astype(int)
-    X_test['Type'] = X_test['Type'].astype('category').cat.codes.astype(int)
-    return X_train, X_test, y_train, y_test
+    global_mean = float(y_train.mean())
+    keys = list(zip(X_test['Store'].values, X_test['Dept'].values))
+    return np.array([means.get(k, global_mean) for k in keys])
 
 
 def _train_and_save(model_choice):
-    X_train, X_test, y_train, y_test = _prepare_splits()
+    X_train, X_test, y_train, y_test, cutoff = _prepare_splits()
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
@@ -84,37 +123,53 @@ def _train_and_save(model_choice):
         )
     model.fit(X_train_scaled, y_train)
 
-    # Save only model + scaler (not the data arrays)
     os.makedirs(MODELS_DIR, exist_ok=True)
-    joblib.dump({'model': model, 'scaler': scaler}, _model_path(model_choice))
+    joblib.dump(
+        {'model': model, 'scaler': scaler, 'feature_cols': FEATURE_COLS},
+        _model_path(model_choice),
+    )
 
     y_pred = model.predict(X_test_scaled)
     info = {
         'model': model_choice,
         'trained_at': datetime.now().isoformat(timespec='seconds'),
+        'split': 'temporal',
+        'cutoff_date': cutoff.strftime('%Y-%m-%d'),
         'n_train': len(X_train),
         'n_test': len(X_test),
-        'r2':   round(r2_score(y_test, y_pred), 4),
+        'feature_cols': FEATURE_COLS,
+        'r2': round(r2_score(y_test, y_pred), 4),
         'rmse': round(np.sqrt(mean_squared_error(y_test, y_pred)), 2),
-        'mae':  round(mean_absolute_error(y_test, y_pred), 2),
+        'mae': round(mean_absolute_error(y_test, y_pred), 2),
     }
     with open(_info_path(model_choice), 'w', encoding='utf-8') as f:
         json.dump(info, f, indent=2)
 
-    return model, scaler, X_train, X_test, y_train, y_test, X_train_scaled, X_test_scaled
+    return model, scaler, X_train, X_test, y_train, y_test, X_train_scaled, X_test_scaled, cutoff
+
+
+def _features_compatible(saved):
+    saved_cols = saved.get('feature_cols')
+    if saved_cols is None:
+        return False
+    return list(saved_cols) == FEATURE_COLS
 
 
 @st.cache_resource
 def get_model_pipeline(model_choice):
-    "Load model from disk if available, otherwise train and save."
+    "Load model from disk if compatible, otherwise train and save."
     path = _model_path(model_choice)
     if os.path.exists(path):
         saved = joblib.load(path)
-        model, scaler = saved['model'], saved['scaler']
-        X_train, X_test, y_train, y_test = _prepare_splits()
-        X_train_scaled = scaler.transform(X_train)
-        X_test_scaled = scaler.transform(X_test)
-        return model, scaler, X_train, X_test, y_train, y_test, X_train_scaled, X_test_scaled
+        if _features_compatible(saved):
+            model, scaler = saved['model'], saved['scaler']
+            X_train, X_test, y_train, y_test, cutoff = _prepare_splits()
+            X_train_scaled = scaler.transform(X_train)
+            X_test_scaled = scaler.transform(X_test)
+            return (
+                model, scaler, X_train, X_test, y_train, y_test,
+                X_train_scaled, X_test_scaled, cutoff,
+            )
     return _train_and_save(model_choice)
 
 
@@ -132,7 +187,7 @@ def modelisation():
     st.title("Modeling & Prediction")
     st.caption(
         "Training machine learning models to forecast weekly department-level sales "
-        "and evaluating their performance on held-out data."
+        "and evaluating their performance on a held-out future period."
     )
 
     try:
@@ -155,10 +210,11 @@ def modelisation():
     with col2:
         st.info(
             "**Excluded features**\n\n"
-            "- **Date** — temporal index, seasonal effects captured via `IsHoliday` "
-            "and economic indicators.\n"
+            "- **Date** — replaced by `Week` / `Month` to capture seasonality "
+            "without leaking the absolute timestamp.\n"
             "- **MarkDown1–5** — sparse (only available post Nov 2011) and weakly "
-            "correlated with sales in our analysis.",
+            "correlated with sales in our analysis.\n"
+            "- **Size** — left out for now; strongly collinear with store identity.",
             icon="ℹ️",
         )
 
@@ -171,38 +227,56 @@ def modelisation():
         "Select a model:",
         ("Linear Regression", "Random Forest Regressor"),
     )
-
-    label = (
-        f"Loading {model_choice}…"
-        if os.path.exists(_model_path(model_choice))
-        else f"Training {model_choice}…"
+    st.caption(
+        "**Linear Regression** is kept as a pedagogical foil "
+        "(shows why numeric Store/Dept IDs break a linear model). "
+        "**Random Forest** is the serious ML candidate — still judged against the baseline below."
     )
-    cached = os.path.exists(_model_path(model_choice))
+
+    path = _model_path(model_choice)
+    will_load = False
+    if os.path.exists(path):
+        try:
+            will_load = _features_compatible(joblib.load(path))
+        except Exception:
+            will_load = False
+
+    label = f"Loading {model_choice}…" if will_load else f"Training {model_choice}…"
     with st.spinner(label):
         pipeline = get_model_pipeline(model_choice)
-    model, scaler, X_train, X_test, _, y_test, X_train_scaled, X_test_scaled = pipeline
+    (
+        model, scaler, X_train, X_test, y_train, y_test,
+        X_train_scaled, X_test_scaled, cutoff,
+    ) = pipeline
 
-    if cached:
+    if will_load:
         info_path = _info_path(model_choice)
         if os.path.exists(info_path):
             with open(info_path, encoding='utf-8') as f:
                 info = json.load(f)
             st.success(
                 f"Model loaded from disk — trained {info['trained_at']} "
-                f"on {info['n_train']:,} samples.",
+                f"on {info['n_train']:,} samples "
+                f"(temporal split, cutoff {info.get('cutoff_date', cutoff.date())}).",
                 icon="💾",
             )
         else:
             st.success(f"{model_choice} loaded from disk.", icon="💾")
     else:
-        st.success(f"{model_choice} trained and saved on {len(X_train):,} samples.", icon="✅")
+        st.success(
+            f"{model_choice} trained and saved on {len(X_train):,} samples "
+            f"(temporal split, cutoff {cutoff.date()}).",
+            icon="✅",
+        )
 
     with st.expander("Preprocessing details"):
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         col1.metric("Training samples", f"{len(X_train):,}")
         col2.metric("Test samples", f"{len(X_test):,}")
+        col3.metric("Cutoff date", str(cutoff.date()))
         st.caption(
-            "80/20 split · `Type` label-encoded · all features standardized (StandardScaler)"
+            "Temporal 80/20 split on unique weeks · `Type` mapped A/B/C → 0/1/2 · "
+            "`Week`/`Month` from Date · all features standardized (StandardScaler)"
         )
         st.dataframe(
             pd.DataFrame(X_train_scaled[:5], columns=X_train.columns).round(3),
@@ -222,12 +296,12 @@ def modelisation():
     col2.metric("RMSE", f"${metrics['RMSE ($)']:,.0f}")
     col3.metric("MAE", f"${metrics['MAE ($)']:,.0f}")
 
-    if model_choice == "Linear Regression" and metrics["R²"] < 0.2:
+    if model_choice == "Linear Regression":
         st.warning(
-            "Linear Regression performs poorly here (R²≈0.06) because `Store` and `Dept` "
-            "are numeric IDs — LR treats them as continuous ordered values, which is incorrect. "
-            "Random Forest handles this naturally through non-linear splits. "
-            "Switch to **Random Forest** to see the difference.",
+            "**Not a production pick** — Linear Regression is here on purpose as a counter-example. "
+            "`Store` and `Dept` are categorical IDs; LR treats them as ordered continuous values, "
+            "so it collapses (R²≈0.06). Random Forest splits on them correctly. "
+            "Switch to **Random Forest**, then check the comparison table: the real bar is the baseline.",
             icon="⚠️",
         )
 
@@ -236,6 +310,7 @@ def modelisation():
         - **R²** — proportion of sales variance explained by the model. 1.0 is perfect.
         - **RMSE** — typical prediction error in dollars (penalises large errors more).
         - **MAE** — average absolute error in dollars (more robust to outliers).
+        - Metrics are computed on a **future** hold-out (weeks after the cutoff), not a random split.
         """)
 
     st.write("")
@@ -254,7 +329,7 @@ def modelisation():
         x="Actual ($)",
         y="Predicted ($)",
         opacity=0.4,
-        title="Actual vs Predicted Weekly Sales",
+        title="Actual vs Predicted Weekly Sales (temporal hold-out)",
         color_discrete_sequence=["#636EFA"],
     )
     fig.add_shape(
@@ -287,11 +362,22 @@ def modelisation():
 
     # ── 4. Model comparison ───────────────────────────────────────────────────
     st.subheader("4 · Model Comparison")
+    st.info(
+        "**How to read this table**\n\n"
+        "- **Baseline** — mean weekly sales per (Store, Dept) on the training period only. "
+        "This is the bar to beat.\n"
+        "- **Linear Regression** — pedagogical foil; expected to fail with raw numeric IDs.\n"
+        "- **Random Forest** — non-linear model; useful only if it beats the baseline.",
+        icon="ℹ️",
+    )
 
     rows = []
+    y_base = _baseline_predict(X_train, y_train, X_test)
+    rows.append({"Model": "Baseline (Store × Dept mean)", **_compute_metrics(y_test, y_base)})
+
     for choice in ["Linear Regression", "Random Forest Regressor"]:
         with st.spinner(f"Evaluating {choice}…"):
-            m, _, _, _, _, y_t, _, x_t_sc = get_model_pipeline(choice)
+            m, _, _, _, _, y_t, _, x_t_sc, _ = get_model_pipeline(choice)
         y_p = m.predict(x_t_sc)
         rows.append({"Model": choice, **_compute_metrics(y_t, y_p)})
 
@@ -302,6 +388,17 @@ def modelisation():
         .highlight_min(axis=0, subset=["RMSE ($)", "MAE ($)"], color="#d4edda")
     )
     st.dataframe(styled, width='stretch')
+
+    if (
+        comparison.loc["Random Forest Regressor", "R²"]
+        < comparison.loc["Baseline (Store × Dept mean)", "R²"]
+    ):
+        st.warning(
+            "On this temporal hold-out, **Random Forest does not beat the baseline**. "
+            "Sales are largely explained by store/department identity — next gains need "
+            "lags or residual modeling on top of the baseline.",
+            icon="📌",
+        )
 
     st.write("---")
 
@@ -317,16 +414,19 @@ def modelisation():
             "Holiday week?", [False, True], format_func=lambda x: "Yes" if x else "No"
         )
         store_type = st.selectbox("Store type", ["A", "B", "C"])
+        week = st.number_input("ISO week", min_value=1, max_value=53, value=26)
     with col2:
         temperature = st.number_input("Temperature (°F)", value=60.0)
         fuel_price = st.number_input("Fuel Price ($/gal)", value=3.50)
         cpi = st.number_input("CPI", value=210.0)
         unemployment = st.number_input("Unemployment (%)", value=8.0)
-
-    type_code = {"A": 0, "B": 1, "C": 2}[store_type]
+        month = st.number_input("Month", min_value=1, max_value=12, value=6)
 
     input_data = pd.DataFrame(
-        [[store, dept, int(is_holiday), temperature, fuel_price, cpi, unemployment, type_code]],
+        [[
+            store, dept, int(is_holiday), temperature, fuel_price,
+            cpi, unemployment, TYPE_CODES[store_type], week, month,
+        ]],
         columns=FEATURE_COLS,
     )
     input_scaled = scaler.transform(input_data)
@@ -350,7 +450,7 @@ def modelisation():
                 ${prediction:,.0f}
             </p>
             <p style="color:#93C5FD; font-size:0.8rem; margin:8px 0 0 0;">
-                {model_choice} · Store {store} · Dept {dept}
+                {model_choice} · Store {store} · Dept {dept} · W{week}/M{month}
             </p>
         </div>
         """,

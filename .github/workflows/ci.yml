@@ -72,8 +72,9 @@ jobs:
           FEATURE_COLS = [
               'Store', 'Dept', 'IsHoliday_x', 'Temperature',
               'Fuel_Price', 'CPI', 'Unemployment', 'Type',
+              'Week', 'Month',
           ]
-          TEST_INPUT = [[20, 1, 0, 60.0, 3.5, 210.0, 8.0, 0]]
+          TEST_INPUT = [[20, 1, 0, 60.0, 3.5, 210.0, 8.0, 0, 26, 6]]
 
           for name in ['linear_regression', 'random_forest_regressor']:
               saved = joblib.load(f'models/{name}.joblib')
