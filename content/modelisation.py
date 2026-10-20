@@ -210,11 +210,11 @@ def modelisation():
     with col2:
         st.info(
             "**Excluded features**\n\n"
-            "- **Date** — replaced by `Week` / `Month` to capture seasonality "
+            "- **Date**: replaced by `Week` / `Month` to capture seasonality "
             "without leaking the absolute timestamp.\n"
-            "- **MarkDown1–5** — sparse (only available post Nov 2011) and weakly "
+            "- **MarkDown1–5**: sparse (only available post Nov 2011) and weakly "
             "correlated with sales in our analysis.\n"
-            "- **Size** — left out for now; strongly collinear with store identity.",
+            "- **Size**: left out for now; strongly collinear with store identity.",
             icon="ℹ️",
         )
 
@@ -230,7 +230,7 @@ def modelisation():
     st.caption(
         "**Linear Regression** is kept as a pedagogical foil "
         "(shows why numeric Store/Dept IDs break a linear model). "
-        "**Random Forest** is the serious ML candidate — still judged against the baseline below."
+        "**Random Forest** is the serious ML candidate, still judged against the baseline below."
     )
 
     path = _model_path(model_choice)
@@ -255,7 +255,7 @@ def modelisation():
             with open(info_path, encoding='utf-8') as f:
                 info = json.load(f)
             st.success(
-                f"Model loaded from disk — trained {info['trained_at']} "
+                f"Model loaded from disk, trained {info['trained_at']} "
                 f"on {info['n_train']:,} samples "
                 f"(temporal split, cutoff {info.get('cutoff_date', cutoff.date())}).",
                 icon="💾",
@@ -298,7 +298,7 @@ def modelisation():
 
     if model_choice == "Linear Regression":
         st.warning(
-            "**Not a production pick** — Linear Regression is here on purpose as a counter-example. "
+            "**Not a production pick**: Linear Regression is here on purpose as a counter-example. "
             "`Store` and `Dept` are categorical IDs; LR treats them as ordered continuous values, "
             "so it collapses (R²≈0.06). Random Forest splits on them correctly. "
             "Switch to **Random Forest**, then check the comparison table: the real bar is the baseline.",
@@ -307,9 +307,9 @@ def modelisation():
 
     with st.expander("What do these metrics mean?"):
         st.write("""
-        - **R²** — proportion of sales variance explained by the model. 1.0 is perfect.
-        - **RMSE** — typical prediction error in dollars (penalises large errors more).
-        - **MAE** — average absolute error in dollars (more robust to outliers).
+        - **R²**: proportion of sales variance explained by the model. 1.0 is perfect.
+        - **RMSE**: typical prediction error in dollars (penalises large errors more).
+        - **MAE**: average absolute error in dollars (more robust to outliers).
         - Metrics are computed on a **future** hold-out (weeks after the cutoff), not a random split.
         """)
 
@@ -364,10 +364,10 @@ def modelisation():
     st.subheader("4 · Model Comparison")
     st.info(
         "**How to read this table**\n\n"
-        "- **Baseline** — mean weekly sales per (Store, Dept) on the training period only. "
+        "- **Baseline**: mean weekly sales per (Store, Dept) on the training period only. "
         "This is the bar to beat.\n"
-        "- **Linear Regression** — pedagogical foil; expected to fail with raw numeric IDs.\n"
-        "- **Random Forest** — non-linear model; useful only if it beats the baseline.",
+        "- **Linear Regression**: pedagogical foil; expected to fail with raw numeric IDs.\n"
+        "- **Random Forest**: non-linear model; useful only if it beats the baseline.",
         icon="ℹ️",
     )
 
@@ -395,7 +395,7 @@ def modelisation():
     ):
         st.warning(
             "On this temporal hold-out, **Random Forest does not beat the baseline**. "
-            "Sales are largely explained by store/department identity — next gains need "
+            "Sales are largely explained by store/department identity. Next gains need "
             "lags or residual modeling on top of the baseline.",
             icon="📌",
         )

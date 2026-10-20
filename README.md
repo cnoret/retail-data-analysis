@@ -7,7 +7,7 @@
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML-F7931E?logo=scikit-learn&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-Predicting weekly department-level sales across 45 Walmart stores using machine learning — built as an end-to-end data science project with an interactive Streamlit app.
+Predicting weekly department-level sales across 45 Walmart stores using machine learning, built as an end-to-end data science project with an interactive Streamlit app.
 
 **Dataset:** 421,570 weekly records · 45 stores · 81 departments · Feb 2010 – Oct 2012 · $6.7B total revenue
 
@@ -15,11 +15,11 @@ Predicting weekly department-level sales across 45 Walmart stores using machine 
 
 ## Features
 
-- **Data Exploration** — interactive overview of the three source datasets with missing value analysis
-- **Data Processing** — cleaning pipeline: imputation, date parsing, and dataset merging
-- **Analysis & Visualization** — interactive Plotly charts: correlation matrix, sales distribution, store rankings, time trends, and holiday impact
-- **Modeling** — temporal hold-out, calendar features (`Week`/`Month`), Store×Dept baseline, Linear Regression (pedagogical foil) vs Random Forest, with R² / RMSE / MAE, Actual vs Predicted, and feature importance
-- **Live Predictions** — input any store/department/context and get an instant sales forecast
+- **Data Exploration**: interactive overview of the three source datasets with missing value analysis
+- **Data Processing**: cleaning pipeline: imputation, date parsing, and dataset merging
+- **Analysis & Visualization**: interactive Plotly charts: correlation matrix, sales distribution, store rankings, time trends, and holiday impact
+- **Modeling**: temporal hold-out, calendar features (`Week`/`Month`), Store×Dept baseline, Linear Regression (pedagogical foil) vs Random Forest, with R² / RMSE / MAE, Actual vs Predicted, and feature importance
+- **Live Predictions**: input any store/department/context and get an instant sales forecast
 
 ## Tech Stack
 
@@ -62,7 +62,7 @@ retail-data-analysis/
 
 ## Results
 
-Evaluation uses a **temporal 80/20 split** on unique weeks (train before `2012-04-13`, test after) — not a random split. Features include store/department context, holiday flag, economic indicators, store type, and calendar fields (`Week`, `Month`).
+Evaluation uses a **temporal 80/20 split** on unique weeks (train before `2012-04-13`, test after), not a random split. Features include store/department context, holiday flag, economic indicators, store type, and calendar fields (`Week`, `Month`).
 
 | Model | R² | RMSE | MAE |
 | --- | --- | --- | --- |
@@ -72,7 +72,7 @@ Evaluation uses a **temporal 80/20 split** on unique weeks (train before `2012-0
 
 **Takeaways**
 - Linear Regression is kept as a **pedagogical foil**: raw numeric `Store`/`Dept` IDs are not linear features, so it collapses.
-- Random Forest handles those IDs via splits and beats LR, but **does not beat the Store×Dept mean baseline** on this hold-out — most signal is identity, not exogenous covariates.
+- Random Forest handles those IDs via splits and beats LR, but **does not beat the Store×Dept mean baseline** on this hold-out. Most signal is identity, not exogenous covariates.
 - RF hyperparameters stay light for Streamlit Cloud memory limits. Next gains need lags or residual modeling on top of the baseline.
 
 ## License
