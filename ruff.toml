@@ -1,5 +1,5 @@
 line-length = 100
-target-version = "py38"
+target-version = "py311"
 
 [lint]
 select = ["E", "F", "W"]
@@ -11,3 +11,5 @@ ignore = [
 [lint.per-file-ignores]
 # ML convention: X_train, X_test etc. are uppercase by standard
 "content/modelisation.py" = ["F841"]
+# sys.path bootstrap before importing the app package
+"scripts/train_models.py" = ["E402"]

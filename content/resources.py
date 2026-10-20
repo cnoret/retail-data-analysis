@@ -16,7 +16,7 @@ def resources():
     # ── Dataset ───────────────────────────────────────────────────────────────
     st.subheader("Dataset")
     st.markdown(
-        "**[Walmart Store Sales Forecasting](https://www.kaggle.com/datasets/manjeetsingh/retaildataset/data)** — Kaggle"
+        "**[Walmart Store Sales Forecasting](https://www.kaggle.com/datasets/manjeetsingh/retaildataset/data)** (Kaggle)"
     )
     st.write(
         "Anonymized weekly sales data from 45 US retail stores (Feb 2010 – Oct 2012), "
@@ -33,17 +33,18 @@ def resources():
     with col1:
         st.markdown("**Data & ML**")
         st.markdown("""
-- [Pandas](https://pandas.pydata.org/) — data manipulation
-- [NumPy](https://numpy.org/) — numerical computing
-- [Scikit-Learn](https://scikit-learn.org/) — modeling & preprocessing
-- [Joblib](https://joblib.readthedocs.io/) — model persistence
+- [Pandas](https://pandas.pydata.org/): data manipulation
+- [NumPy](https://numpy.org/): numerical computing
+- [Scikit-Learn](https://scikit-learn.org/): modeling & preprocessing
+- [Joblib](https://joblib.readthedocs.io/): model persistence
         """)
 
     with col2:
         st.markdown("**Visualization & App**")
         st.markdown("""
-- [Plotly](https://plotly.com/python/) — interactive charts
-- [Streamlit](https://streamlit.io/) — web app framework
+- [Plotly](https://plotly.com/python/): interactive charts
+- [Streamlit](https://streamlit.io/): web app framework
+- [streamlit-option-menu](https://github.com/victoryhb/streamlit-option-menu): sidebar navigation
         """)
 
     st.write("---")

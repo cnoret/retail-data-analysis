@@ -1,10 +1,11 @@
 {
   "model": "Linear Regression",
-  "trained_at": "2026-10-20T16:33:27",
+  "kind": "direct",
+  "trained_at": "2026-10-20T18:30:49",
   "split": "temporal",
   "cutoff_date": "2012-04-13",
-  "n_train": 335761,
-  "n_test": 85809,
+  "n_train": 334775,
+  "n_test": 85510,
   "feature_cols": [
     "Store",
     "Dept",
@@ -17,7 +18,7 @@
     "Week",
     "Month"
   ],
-  "r2": 0.0633,
-  "rmse": 21251.33,
-  "mae": 14820.23
+  "r2": 0.0634,
+  "rmse": 21267.91,
+  "mae": 14836.18
 }

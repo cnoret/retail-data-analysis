@@ -1,0 +1,24 @@
+{
+  "model": "Residual Random Forest",
+  "kind": "residual",
+  "trained_at": "2026-10-20T18:31:04",
+  "split": "temporal",
+  "cutoff_date": "2012-04-13",
+  "n_train": 334775,
+  "n_test": 85510,
+  "feature_cols": [
+    "Store",
+    "Dept",
+    "IsHoliday_x",
+    "Temperature",
+    "Fuel_Price",
+    "CPI",
+    "Unemployment",
+    "Type",
+    "Week",
+    "Month"
+  ],
+  "r2": 0.9583,
+  "rmse": 4488.0,
+  "mae": 2332.84
+}

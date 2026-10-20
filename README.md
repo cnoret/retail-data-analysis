@@ -3,7 +3,7 @@
 [![Live Demo](https://img.shields.io/badge/Live%20App-Open-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://retail-data-analysis.streamlit.app/)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cnoret/retail-data-analysis/blob/main/WalmartSalesPrediction.ipynb)
 [![CI](https://github.com/cnoret/retail-data-analysis/actions/workflows/ci.yml/badge.svg)](https://github.com/cnoret/retail-data-analysis/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML-F7931E?logo=scikit-learn&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -16,19 +16,19 @@ Predicting weekly department-level sales across 45 Walmart stores using machine 
 ## Features
 
 - **Data Exploration**: interactive overview of the three source datasets with missing value analysis
-- **Data Processing**: cleaning pipeline: imputation, date parsing, and dataset merging
-- **Analysis & Visualization**: interactive Plotly charts: correlation matrix, sales distribution, store rankings, time trends, and holiday impact
-- **Modeling**: temporal hold-out, calendar features (`Week`/`Month`), Store×Dept baseline, Linear Regression (pedagogical foil) vs Random Forest, with R² / RMSE / MAE, Actual vs Predicted, and feature importance
-- **Live Predictions**: input any store/department/context and get an instant sales forecast
+- **Data Processing**: walkthrough of the cleaning/merge pipeline that produced the committed merged CSV
+- **Analysis & Visualization**: interactive Plotly charts (correlation, sales distribution, store rankings, trends, holidays)
+- **Modeling**: temporal hold-out, calendar features, Store×Dept baseline, Linear Regression (foil), Random Forest, and **Residual Random Forest** (baseline + RF on residuals)
+- **Live Predictions**: forecast for a real store/department and week date
 
 ## Tech Stack
 
 | Layer | Libraries |
 | --- | --- |
 | Data | Pandas, NumPy |
-| ML | Scikit-Learn (LinearRegression, RandomForestRegressor) · Joblib (model persistence) |
+| ML | Scikit-Learn (LinearRegression, RandomForestRegressor) · Joblib |
 | Visualization | Plotly |
-| App | Streamlit |
+| App | Streamlit · streamlit-option-menu |
 | Deployment | Streamlit Cloud |
 
 ## Quick Start
@@ -36,44 +36,53 @@ Predicting weekly department-level sales across 45 Walmart stores using machine 
 ```bash
 git clone https://github.com/cnoret/retail-data-analysis.git
 cd retail-data-analysis
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
 App available at `http://localhost:8501`
 
+### Retrain models
+
+```bash
+python scripts/train_models.py
+```
+
+Writes joblib artifacts and `*_info.json` under `models/`.
+
 ## Project Structure
 
 ```text
 retail-data-analysis/
-├── app.py                  # Entry point
-├── content/
-│   ├── intro.py
-│   ├── exploration.py
-│   ├── preparation.py
-│   ├── visualisation.py
-│   ├── modelisation.py
-│   └── resources.py
-├── data/                   # CSV datasets
-├── models/                 # Pre-trained models (joblib)
-├── images/                 # UI assets
+├── app.py                         # Streamlit entry point
+├── content/                       # App pages
+├── data/                          # Raw CSVs + merged_retail_data.csv
+├── models/                        # Pre-trained joblib artifacts
+├── scripts/train_models.py        # Retrain helper
+├── WalmartSalesPrediction.ipynb   # Colab / notebook walkthrough
+├── .github/workflows/ci.yml
+├── .streamlit/config.toml
 └── requirements.txt
 ```
 
 ## Results
 
-Evaluation uses a **temporal 80/20 split** on unique weeks (train before `2012-04-13`, test after), not a random split. Features include store/department context, holiday flag, economic indicators, store type, and calendar fields (`Week`, `Month`).
+Evaluation uses a **temporal 80/20 split** on unique weeks (train before `2012-04-13`, test after). Negative `Weekly_Sales` rows (returns/adjustments) are dropped. Features: store/department, holiday flag, economic indicators, store type, `Week`, `Month`.
 
 | Model | R² | RMSE | MAE |
 | --- | --- | --- | --- |
+| **Residual Random Forest** (baseline + RF) | **~0.96** | **~$4,500** | **~$2,300** |
 | Baseline (Store × Dept mean) | ~0.94 | ~$5,300 | ~$2,600 |
-| Random Forest (`n=20`, `depth=10`) | ~0.87 | ~$7,800 | ~$4,600 |
+| Random Forest (`n=20`, `depth=10`) | ~0.88 | ~$7,600 | ~$4,500 |
 | Linear Regression | ~0.06 | ~$21,000 | ~$15,000 |
 
 **Takeaways**
-- Linear Regression is kept as a **pedagogical foil**: raw numeric `Store`/`Dept` IDs are not linear features, so it collapses.
-- Random Forest handles those IDs via splits and beats LR, but **does not beat the Store×Dept mean baseline** on this hold-out. Most signal is identity, not exogenous covariates.
-- RF hyperparameters stay light for Streamlit Cloud memory limits. Next gains need lags or residual modeling on top of the baseline.
+- Linear Regression is a **pedagogical foil**: raw numeric `Store`/`Dept` IDs are not linear features.
+- A direct Random Forest beats LR but **loses to the Store×Dept mean** on this hold-out.
+- **Residual Random Forest** keeps the strong identity baseline and models seasonal/contextual residuals, beating the baseline on R², RMSE, and MAE.
+- RF hyperparameters stay light for Streamlit Cloud memory limits.
 
 ## License
 

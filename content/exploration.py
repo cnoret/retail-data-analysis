@@ -52,7 +52,7 @@ def exploration():
     st.title("Data Exploration")
     st.info(
         'The datasets are clean and well-structured. Only **features.csv** contains missing values, '
-        'in the "MarkDown" columns — weeks with no active promotions.',
+        'in the "MarkDown" columns (weeks with no active promotions).',
         icon='✨',
     )
 

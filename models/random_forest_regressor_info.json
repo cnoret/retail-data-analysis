@@ -1,10 +1,11 @@
 {
   "model": "Random Forest Regressor",
-  "trained_at": "2026-10-20T16:33:36",
+  "kind": "direct",
+  "trained_at": "2026-10-20T18:30:57",
   "split": "temporal",
   "cutoff_date": "2012-04-13",
-  "n_train": 335761,
-  "n_test": 85809,
+  "n_train": 334775,
+  "n_test": 85510,
   "feature_cols": [
     "Store",
     "Dept",
@@ -17,7 +18,7 @@
     "Week",
     "Month"
   ],
-  "r2": 0.8732,
-  "rmse": 7819.31,
-  "mae": 4634.37
+  "r2": 0.8813,
+  "rmse": 7570.19,
+  "mae": 4534.65
 }

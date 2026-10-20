@@ -52,8 +52,8 @@ def visualisation():
 
     with st.expander("Key insights"):
         st.write("""
-        - **Store & Dept** show the strongest correlation with `Weekly_Sales`, confirming that
-          store size and department type are the primary sales drivers.
+        - **Store & Dept** correlate strongly with `Weekly_Sales`, but they are **IDs**, not
+          continuous drivers. Treat that signal as identity (baseline), not a linear effect.
         - **MarkDown1–5** have weak positive correlations with sales — promotions help,
           but their effect is modest and inconsistent.
         - **CPI and Unemployment** are negatively correlated with sales, reflecting the impact
@@ -84,8 +84,8 @@ def visualisation():
           fall below $100K, while a long tail extends to over $500K.
         - The high-value outliers correspond to large-format stores (Type A) during
           peak holiday weeks.
-        - This skew suggests that a **log transformation** could improve model performance
-          by reducing the influence of extreme values.
+        - Modeling keeps the target in dollars and uses a **Store×Dept baseline + residual RF**
+          so extreme weeks are explained relative to each department's typical level.
         """)
 
     st.write("---")

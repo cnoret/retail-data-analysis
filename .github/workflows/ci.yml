@@ -36,7 +36,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Check syntax
-        run: python -m compileall -q content/ app.py
+        run: python -m compileall -q content/ app.py scripts/
+      - name: Import app modules
+        run: python -c "import app; import content.modelisation, content.exploration, content.preparation, content.visualisation, content.intro, content.resources"
       - name: Check dependency consistency
         run: pip check
 
@@ -66,20 +68,43 @@ jobs:
       - name: Validate models
         run: |
           python - <<'EOF'
+          import json
           import joblib
-          import numpy as np
+          import pandas as pd
 
           FEATURE_COLS = [
               'Store', 'Dept', 'IsHoliday_x', 'Temperature',
               'Fuel_Price', 'CPI', 'Unemployment', 'Type',
               'Week', 'Month',
           ]
-          TEST_INPUT = [[20, 1, 0, 60.0, 3.5, 210.0, 8.0, 0, 26, 6]]
+          TEST_INPUT = pd.DataFrame(
+              [[20, 1, 0, 60.0, 3.5, 210.0, 8.0, 0, 26, 6]],
+              columns=FEATURE_COLS,
+          )
 
-          for name in ['linear_regression', 'random_forest_regressor']:
+          def predict(artifact, X):
+              scaled = artifact['scaler'].transform(X)
+              if artifact.get('kind') == 'residual':
+                  key = f"{int(X['Store'].iloc[0])}_{int(X['Dept'].iloc[0])}"
+                  base = artifact['baseline_means'].get(key, artifact['global_mean'])
+                  return float(base + artifact['model'].predict(scaled)[0])
+              return float(artifact['model'].predict(scaled)[0])
+
+          for name in [
+              'linear_regression',
+              'random_forest_regressor',
+              'residual_random_forest',
+          ]:
               saved = joblib.load(f'models/{name}.joblib')
-              model, scaler = saved['model'], saved['scaler']
-              pred = model.predict(scaler.transform(TEST_INPUT))[0]
+              assert list(saved['feature_cols']) == FEATURE_COLS, name
+              info = json.load(open(f'models/{name}_info.json'))
+              assert list(info['feature_cols']) == FEATURE_COLS, name
+              pred = predict(saved, TEST_INPUT)
               assert 0 < pred < 1_000_000, f'{name}: prediction {pred:,.0f} out of range'
-              print(f'{name}: OK  pred=${pred:,.0f}')
+              print(f'{name}: OK  pred=${pred:,.0f}  kind={saved.get("kind")}')
+
+          resid = json.load(open('models/residual_random_forest_info.json'))
+          base_r2 = 0.94  # Store×Dept mean floor from project docs
+          assert resid['r2'] > base_r2, f"residual R² {resid['r2']} should beat baseline"
+          print('residual beats baseline threshold: OK')
           EOF
