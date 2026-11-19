@@ -41,6 +41,8 @@ jobs:
         run: python -c "import app; import content.modelisation, content.dashboard, content.exploration, content.preparation, content.visualisation, content.intro, content.resources"
       - name: Check dependency consistency
         run: pip check
+      - name: Cross-check SQL results with the app
+        run: python scripts/run_sql.py --check
 
   security:
     name: Security (pip-audit)
