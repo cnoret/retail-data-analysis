@@ -29,7 +29,7 @@ This project answers those four questions with the chain's own sales history, th
 2. **Investigate the decline of large stores before it spreads.** 18 of 45 stores sold less in Feb–Oct 2012 than in the same months of 2010. Store 14, the #3 store by revenue, lost **15%**, and stores 35 and 36 lost 22% and 32%.
 3. **Plan the holiday peak on the real calendar, not on the dataset's holiday flag.** The week before Christmas sells **+67–75%** above a median week and Thanksgiving week **+42–44%**. The flagged "Christmas" week (the one after Dec 25) sells **at or below** a median week. Nov–Dec represents **~21% of yearly revenue in 17% of the weeks**.
 4. **Back the departments that carry growth, review the ones that shrink.** The top 10 departments make **46% of revenue**. Departments 92, 87 and 90 drove most of the growth (+$26M between Feb–Oct 2010 and 2012), while departments 55 and 6 fell by 25% and 35%.
-5. **Test markdowns before scaling them.** $40M of markdowns were recorded from Nov 2011, with no measurable sales lift: outside holidays, heavy-markdown weeks sell about the same as other weeks (+1.4% vs +1.8% above store median). A controlled test (matched stores, with and without markdowns) is needed before spending more.
+5. **Test markdowns before scaling them.** $40M of markdowns were recorded from Nov 2011, with no measurable sales lift: outside holidays, a store sells the same in its high-markdown weeks as in its other weeks (−0.1% vs its average week). A controlled test (matched stores, with and without markdowns) is needed before spending more.
 
 ---
 
@@ -61,11 +61,32 @@ Store and department identity explain most of the variation: a simple average pe
 
 ---
 
+## SQL analysis
+
+Each business question also has a plain SQL query in [`sql/`](sql/), run with [DuckDB](https://duckdb.org/) directly on the raw CSV files (no database server needed).
+
+| File | Question |
+| --- | --- |
+| `00_staging.sql` | Typed views over the raw CSVs (`stores`, `sales`, `features`) |
+| `01_store_productivity.sql` | Which stores underperform once size is taken into account? |
+| `02_store_growth.sql` | Which stores grow or decline (Feb–Oct 2012 vs 2010)? |
+| `03_holiday_peak.sql` | How big is the holiday peak vs a median week? |
+| `04_department_mix.sql` | Which departments weigh the most, and how do they evolve? |
+| `05_markdowns.sql` | Do markdown weeks sell more than other weeks? |
+
+```bash
+python scripts/run_sql.py          # run every query
+python scripts/run_sql.py 03       # run one query
+python scripts/run_sql.py --check  # check SQL and the app give the same figures (run in CI)
+```
+
+---
+
 ## Tech stack
 
 | Layer | Tools |
 | --- | --- |
-| Analysis | Pandas, NumPy |
+| Analysis | Pandas, NumPy, SQL (DuckDB) |
 | Visualization | Plotly |
 | App | Streamlit, streamlit-option-menu |
 | Deployment | Streamlit Cloud |
@@ -96,6 +117,8 @@ retail-data-analysis/
 ├── content/                       # App pages
 ├── data/                          # Raw CSVs + merged dataset
 ├── models/                        # Optional forecast artifacts
+├── sql/                           # SQL version of each business question (DuckDB)
+├── scripts/run_sql.py             # Run the SQL queries / cross-check with the app
 ├── scripts/train_models.py        # Retrain helper (annex)
 ├── WalmartSalesPrediction.ipynb   # Notebook walkthrough
 ├── .github/workflows/ci.yml
