@@ -1,4 +1,4 @@
-# Walmart Retail Sales Analysis
+# Walmart Store Performance Review
 
 [![Live Demo](https://img.shields.io/badge/Live%20App-Open-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://retail-data-analysis.streamlit.app/)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cnoret/retail-data-analysis/blob/main/WalmartSalesPrediction.ipynb)
@@ -7,21 +7,43 @@
 ![Pandas](https://img.shields.io/badge/Pandas-Analysis-150458?logo=pandas&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-End-to-end **retail sales analysis** on Walmart weekly data: exploration, cleaning, KPIs, interactive dashboards, and a lightweight forecasting annex. Built as a portfolio project for **Data Analyst** roles.
+**Regional performance review** of 45 Walmart stores: where revenue is lost, which stores and departments need attention, and how to plan the holiday peak. Delivered as an interactive Streamlit app backed by reproducible pandas analysis.
 
-**Dataset:** 421,570 weekly records · 45 stores · 81 departments · Feb 2010 – Oct 2012 · $6.7B total revenue
+**Data:** 421,570 weekly sales records · 45 stores · 81 departments · Feb 2010 – Oct 2012 · $6.7B revenue (~$2.45B a year)
 
 **Live app:** [retail-data-analysis.streamlit.app](https://retail-data-analysis.streamlit.app/)
 
 ---
 
-## Business insights
+## The brief
 
-- Sales are dominated by **store × department identity**: a simple historical mean per (Store, Dept) already explains most of the variance. Any forecast must beat that bar.
-- Clear **seasonality**: large spikes around Thanksgiving / Christmas, with a secondary post-holiday bump.
-- **Holiday weeks** lift the median and widen the upper tail versus regular weeks.
-- Store performance is uneven: a small set of stores (e.g. 20, 4, 14) concentrates a large share of revenue.
-- Markdown promotions are sparse and only weakly related to sales in this dataset; economic indicators (CPI, unemployment) show mild negative association with sales.
+> *A regional manager overseeing 45 stores needs to set priorities for next year: which stores underperform, which departments to back, how to prepare for the holiday season, and whether markdown promotions are worth their cost.*
+
+This project answers those four questions with the chain's own sales history, then turns the answers into actions.
+
+---
+
+## Recommendations
+
+1. **Audit 7 underperforming stores first.** Stores 9, 15, 21, 25, 29, 45 (type B) and 44 (type C) sell **25–51% less per square foot** than the median store of their type. Bringing them to that median would be worth **up to ~$140M a year** (about 6% of revenue).
+2. **Investigate the decline of large stores before it spreads.** 18 of 45 stores sold less in Feb–Oct 2012 than in the same months of 2010. Store 14, the #3 store by revenue, lost **15%**, and stores 35 and 36 lost 22% and 32%.
+3. **Plan the holiday peak on the real calendar, not on the dataset's holiday flag.** The week before Christmas sells **+67–75%** above a median week and Thanksgiving week **+42–44%**. The flagged "Christmas" week (the one after Dec 25) sells **at or below** a median week. Nov–Dec represents **~21% of yearly revenue in 17% of the weeks**.
+4. **Back the departments that carry growth, review the ones that shrink.** The top 10 departments make **46% of revenue**. Departments 92, 87 and 90 drove most of the growth (+$26M between Feb–Oct 2010 and 2012), while departments 55 and 6 fell by 25% and 35%.
+5. **Test markdowns before scaling them.** $40M of markdowns were recorded from Nov 2011, with no measurable sales lift: outside holidays, heavy-markdown weeks sell about the same as other weeks (+1.4% vs +1.8% above store median). A controlled test (matched stores, with and without markdowns) is needed before spending more.
+
+---
+
+## Key findings
+
+| Question | Finding | Evidence |
+| --- | --- | --- |
+| Where is revenue concentrated? | Type A stores make 64% of revenue; the top 10 stores make 39% | Store ranking, sales per sq ft by type |
+| Which stores underperform? | 7 stores sit more than 25% below their type's median sales per sq ft | Size-adjusted store comparison |
+| Is the business growing? | Flat overall (+1.9% Feb–Oct 2012 vs 2010), with 18 stores in decline | Year-over-year on comparable months |
+| How strong is seasonality? | December weeks sell 25% above other weeks; the most seasonal departments (7, 55, 5) sell 2.4–3.4× more | Weekly trend, department uplift |
+| Do external factors matter? | CPI, unemployment, fuel price and temperature show near-zero correlation with sales (\|r\| < 0.03) | Correlation analysis |
+
+Store and department identity explain most of the variation: a simple average per (store, department) already captures ~94% of it. Performance is mostly a matter of **which store and which department**, which is why the recommendations target specific stores and departments.
 
 ---
 
@@ -29,6 +51,7 @@ End-to-end **retail sales analysis** on Walmart weekly data: exploration, cleani
 
 | Page | Purpose |
 | --- | --- |
+| **Overview** | The brief and the five recommendations, with live figures |
 | **Dashboard** | One-screen executive summary (KPIs, trend, top stores) |
 | **Data Exploration** | Source tables, missing values, schema |
 | **Data Processing** | Cleaning / merge walkthrough behind `merged_retail_data.csv` |
@@ -81,7 +104,7 @@ retail-data-analysis/
 
 ---
 
-## Forecasting annex (optional)
+## Appendix: forecasting check
 
 A short modeling section tests whether ML adds value **beyond** a business baseline (mean sales per Store × Dept) on a **temporal** hold-out (cutoff `2012-04-13`).
 
@@ -92,7 +115,7 @@ A short modeling section tests whether ML adds value **beyond** a business basel
 | Direct Random Forest | ~0.88 | ~$7,600 | ~$4,500 |
 | Linear Regression (foil) | ~0.06 | ~$21,000 | ~$15,000 |
 
-**Analyst takeaway:** most signal is structural (which store / department). A residual model improves a bit on holidays and seasonality; it is not the core of this project.
+**Takeaway:** most of the signal is structural (which store, which department). A model on top of the baseline improves a little on holiday weeks, which supports the holiday-planning recommendation, but forecasting is not the core of this review.
 
 Retrain (optional): `python scripts/train_models.py`
 

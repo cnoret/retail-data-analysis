@@ -50,7 +50,7 @@ with st.sidebar:
     choice = option_menu(
         menu_title="Summary",
         options=[
-            "Introduction",
+            "Overview",
             "Dashboard",
             "Data Exploration",
             "Data Processing",
@@ -81,7 +81,7 @@ with st.sidebar:
     col2.link_button("GitHub", "https://github.com/cnoret", width='stretch')
 
 ## Main Menu
-if choice == "Introduction":
+if choice == "Overview":
     introduction()
 
 elif choice == "Dashboard":
