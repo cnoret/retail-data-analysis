@@ -6,11 +6,12 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+from content.data import load_merged
 
-@st.cache_data
+
 def load_viz_data():
-    "Load merged retail dataset."
-    return pd.read_csv('data/merged_retail_data.csv')
+    "Load merged retail dataset (shared, read-only)."
+    return load_merged()
 
 
 @st.cache_data

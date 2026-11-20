@@ -2,18 +2,15 @@
 Page : Dashboard (executive summary)
 """
 
-import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from content.data import load_merged
 from content.intro import compute_headline_figures
 
 
-@st.cache_data
 def _load_dashboard_data():
-    df = pd.read_csv("data/merged_retail_data.csv")
-    df["Date"] = pd.to_datetime(df["Date"])
-    return df
+    return load_merged()
 
 
 def dashboard():

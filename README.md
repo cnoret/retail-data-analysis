@@ -107,6 +107,17 @@ streamlit run app.py
 
 App: `http://localhost:8501`
 
+To reproduce the published figures with the exact versions used (Python 3.11):
+
+```bash
+pip install -r requirements-lock.txt pytest
+python scripts/build_dataset.py --check   # rebuild merged_retail_data.csv from the raw files and compare
+python scripts/run_sql.py --check         # SQL and the app give the same figures
+pytest                                    # data quality and headline figures
+```
+
+All three checks run in CI.
+
 ---
 
 ## Project structure
@@ -114,12 +125,15 @@ App: `http://localhost:8501`
 ```text
 retail-data-analysis/
 ├── app.py                         # Streamlit entry point
-├── content/                       # App pages
+├── content/                       # App pages (data.py: shared loader)
 ├── data/                          # Raw CSVs + merged dataset
 ├── models/                        # Optional forecast artifacts
 ├── sql/                           # SQL version of each business question (DuckDB)
 ├── scripts/run_sql.py             # Run the SQL queries / cross-check with the app
 ├── scripts/train_models.py        # Retrain helper (annex)
+├── scripts/build_dataset.py       # Build the merged dataset from the raw CSVs
+├── tests/                         # pytest: data quality and headline figures
+├── requirements-lock.txt          # Exact versions (Python 3.11)
 ├── WalmartSalesPrediction.ipynb   # Notebook walkthrough
 ├── .github/workflows/ci.yml
 └── requirements.txt

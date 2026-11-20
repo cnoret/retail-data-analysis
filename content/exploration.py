@@ -5,14 +5,23 @@ Page : Data Exploration
 import streamlit as st
 import pandas as pd
 
+from content.data import load_merged
+
 
 @st.cache_data
+def _load_raw_files():
+    "Load the three raw CSV files."
+    return (
+        pd.read_csv('data/stores.csv'),
+        pd.read_csv('data/sales.csv'),
+        pd.read_csv('data/features.csv'),
+    )
+
+
 def load_exploration_data():
-    "Load all source CSV files."
-    df = pd.read_csv('data/merged_retail_data.csv')
-    stores = pd.read_csv('data/stores.csv')
-    sales = pd.read_csv('data/sales.csv')
-    features = pd.read_csv('data/features.csv')
+    "Load the merged dataset and the three raw CSV files."
+    df = load_merged()
+    stores, sales, features = _load_raw_files()
     return df, stores, sales, features
 
 
