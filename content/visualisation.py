@@ -2,9 +2,11 @@
 Page : Visualization
 """
 
-import streamlit as st
+import numpy as np
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
+import streamlit as st
 
 from content.data import load_merged
 
@@ -21,8 +23,41 @@ def prepare_correlation_data(df):
     encoded['Type'] = encoded['Type'].astype('category').cat.codes
     encoded['IsHoliday_x'] = encoded['IsHoliday_x'].astype(int)
     encoded = encoded.drop(columns=['IsHoliday_y'], errors='ignore')
-    encoded['Date'] = pd.to_datetime(encoded['Date']).map(pd.Timestamp.timestamp)
+    encoded['Date'] = pd.to_datetime(encoded['Date']).astype('int64') // 10**9
     return encoded.select_dtypes(include=['number']).corr()
+
+
+# The two distribution charts below are summarised on the server. Sending the
+# 420k raw values to the browser (~12 MB per visit) made the page freeze.
+
+@st.cache_data
+def sales_histogram(df, bins=60):
+    "Counts of weekly sales per bin (bin centre, bin width, count)."
+    counts, edges = np.histogram(df['Weekly_Sales'], bins=bins)
+    return pd.DataFrame({
+        'center': (edges[:-1] + edges[1:]) / 2,
+        'width': np.diff(edges),
+        'count': counts,
+    })
+
+
+@st.cache_data
+def holiday_box_stats(df):
+    "Box-plot statistics of weekly sales for flagged and other weeks (1.5 IQR whiskers)."
+    rows = []
+    for flag, sales in df.groupby('IsHoliday_x')['Weekly_Sales']:
+        q1, median, q3 = sales.quantile([0.25, 0.5, 0.75])
+        iqr = q3 - q1
+        rows.append({
+            'flag': bool(flag),
+            'q1': q1,
+            'median': median,
+            'q3': q3,
+            'lower': sales[sales >= q1 - 1.5 * iqr].min(),
+            'upper': sales[sales <= q3 + 1.5 * iqr].max(),
+            'n': len(sales),
+        })
+    return pd.DataFrame(rows).sort_values('flag')
 
 
 def visualisation():
@@ -69,15 +104,19 @@ def visualisation():
     # ── 2. Weekly sales distribution ─────────────────────────────────────────
     st.subheader("2 · Weekly Sales Distribution")
 
-    fig = px.histogram(
-        data,
-        x='Weekly_Sales',
-        nbins=60,
+    hist = sales_histogram(data)
+    fig = go.Figure(go.Bar(
+        x=hist['center'],
+        y=hist['count'],
+        width=hist['width'] * 0.95,
+        marker_color='#636EFA',
+        hovertemplate="Around $%{x:,.0f}<br>%{y:,} store-department weeks<extra></extra>",
+    ))
+    fig.update_layout(
         title="Distribution of Weekly Sales",
-        labels={'Weekly_Sales': 'Weekly Sales ($)', 'count': 'Frequency'},
-        color_discrete_sequence=['#636EFA'],
+        xaxis_title="Weekly Sales ($)",
+        yaxis_title="Frequency",
     )
-    fig.update_layout(bargap=0.05)
     st.plotly_chart(fig, width='stretch')
 
     with st.expander("Key insights"):
@@ -159,17 +198,22 @@ def visualisation():
     # ── 5. Holiday impact ─────────────────────────────────────────────────────
     st.subheader("5 · Holiday vs Non-Holiday Sales")
 
-    fig = px.box(
-        data,
-        x='IsHoliday_x',
-        y='Weekly_Sales',
-        color='IsHoliday_x',
-        title="Weekly Sales Distribution by Holiday Week",
-        labels={'IsHoliday_x': 'Holiday Week', 'Weekly_Sales': 'Weekly Sales ($)'},
-        category_orders={'IsHoliday_x': [False, True]},
-        color_discrete_map={False: '#636EFA', True: '#EF553B'},
+    stats = holiday_box_stats(data)
+    fig = go.Figure()
+    for row in stats.itertuples():
+        label = "Flagged holiday week" if row.flag else "Other weeks"
+        fig.add_trace(go.Box(
+            name=label,
+            x=[label],
+            q1=[row.q1], median=[row.median], q3=[row.q3],
+            lowerfence=[row.lower], upperfence=[row.upper],
+            marker_color='#EF553B' if row.flag else '#636EFA',
+        ))
+    fig.update_layout(
+        title="Weekly Sales Distribution by Holiday Week (outliers not drawn)",
+        yaxis_title="Weekly Sales ($)",
+        showlegend=False,
     )
-    fig.update_layout(showlegend=False)
     st.plotly_chart(fig, width='stretch')
 
     with st.expander("Key insights"):
