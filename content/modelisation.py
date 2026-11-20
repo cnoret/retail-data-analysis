@@ -16,6 +16,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 
+from content.data import load_merged
+
 FEATURE_COLS = [
     'Store', 'Dept', 'IsHoliday_x', 'Temperature',
     'Fuel_Price', 'CPI', 'Unemployment', 'Type',
@@ -86,17 +88,15 @@ def _baseline_vector(means_dict, global_mean, stores, depts):
     ])
 
 
-@st.cache_data
 def load_model_data():
-    "Load merged retail dataset."
-    return pd.read_csv('data/merged_retail_data.csv')
+    "Load merged retail dataset (shared, read-only)."
+    return load_merged()
 
 
 @st.cache_data
 def _prepare_splits():
     """Temporal 80/20 split; drop negative Weekly_Sales (returns/adjustments)."""
-    data = _add_calendar_features(pd.read_csv('data/merged_retail_data.csv'))
-    data['Date'] = pd.to_datetime(data['Date'])
+    data = _add_calendar_features(load_merged())  # returns a copy
     data['Type'] = _encode_type(data['Type'])
     data['IsHoliday_x'] = data['IsHoliday_x'].astype(int)
     n_neg = int((data['Weekly_Sales'] < 0).sum())

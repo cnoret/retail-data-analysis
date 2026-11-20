@@ -44,6 +44,21 @@ jobs:
       - name: Cross-check SQL results with the app
         run: python scripts/run_sql.py --check
 
+  tests:
+    name: Tests (pinned versions)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install pinned dependencies
+        run: pip install -r requirements-lock.txt pytest
+      - name: Rebuild the merged dataset and compare
+        run: python scripts/build_dataset.py --check
+      - name: Run tests
+        run: pytest -q
+
   security:
     name: Security (pip-audit)
     runs-on: ubuntu-latest
@@ -55,7 +70,9 @@ jobs:
       - name: Install pip-audit
         run: pip install pip-audit
       - name: Audit dependencies
-        run: pip-audit -r requirements.txt
+        run: |
+          pip-audit -r requirements.txt
+          pip-audit -r requirements-lock.txt
 
   models:
     name: Model Integrity

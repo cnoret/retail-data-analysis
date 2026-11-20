@@ -22,7 +22,8 @@ def preparation():
     st.title("Data Processing")
     st.caption(
         "Walkthrough of the cleaning and merge steps that produced "
-        "`data/merged_retail_data.csv` (the file used by Visualization and Modeling)."
+        "`data/merged_retail_data.csv` (the file used by Visualization and Modeling). "
+        "The same steps run in `scripts/build_dataset.py`, checked in CI."
     )
     st.info(
         "This page **recomputes the pipeline in-session for illustration**. "

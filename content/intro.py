@@ -2,19 +2,17 @@
 Page : Overview (the brief and the recommendations)
 """
 
-import pandas as pd
 import streamlit as st
+
+from content.data import load_merged
 
 UNDERPERFORMANCE_THRESHOLD = 0.75  # below 75% of the type median sales per sq ft
 SHRINKING_DEPT_THRESHOLD = -0.20  # departments that lost more than 20% (Feb-Oct 2012 vs 2010)
 SHRINKING_DEPT_MIN_LOSS = 1e6  # ... and more than $1M, to leave out tiny departments
 
 
-@st.cache_data
 def _load_overview_data():
-    df = pd.read_csv("data/merged_retail_data.csv")
-    df["Date"] = pd.to_datetime(df["Date"])
-    return df
+    return load_merged()
 
 
 @st.cache_data
