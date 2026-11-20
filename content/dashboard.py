@@ -41,7 +41,7 @@ def dashboard():
     col2.metric("Stores", f"{n_stores}")
     col3.metric("Departments", f"{n_depts}")
     col4.metric(
-        "Pre-Christmas peak",
+        "Peak week",
         f"{figures['pre_christmas_lift']:+.0%}",
         help="Best week before Christmas vs a median week (chain-wide sales)",
     )
@@ -89,7 +89,7 @@ def dashboard():
             height=340,
             margin={"t": 10, "b": 10, "l": 10, "r": 10},
             coloraxis_showscale=False,
-            yaxis={"categoryorder": "total ascending"},
+            yaxis={"type": "category", "categoryorder": "total ascending"},
         )
         st.plotly_chart(fig, width="stretch")
 
