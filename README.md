@@ -13,6 +13,8 @@
 
 **Live app:** [retail-data-analysis.streamlit.app](https://retail-data-analysis.streamlit.app/)
 
+![Overview page: the brief, headline KPIs and the five recommendations](images/screenshots/overview.png)
+
 ---
 
 ## The brief
@@ -25,7 +27,7 @@ This project answers those four questions with the chain's own sales history, th
 
 ## Recommendations
 
-1. **Audit 7 underperforming stores first.** Stores 9, 15, 21, 25, 29, 45 (type B) and 44 (type C) sell **25–51% less per square foot** than the median store of their type. Bringing them to that median would be worth **up to ~$140M a year** (about 6% of revenue).
+1. **Audit 7 underperforming stores first.** Stores 9, 15, 21, 25, 29, 45 (type B) and 44 (type C) sell **25–51% less per square foot** than the median store of their type. Bringing them to that median would be worth **up to ~$140M a year** (about 6% of revenue). Start with **stores 15 and 21**, which are both below their peers and shrinking (−7% and −4%); stores 9 and 44 are low but growing fast (+12% and +17%).
 2. **Investigate the decline of large stores before it spreads.** 18 of 45 stores sold less in Feb–Oct 2012 than in the same months of 2010. Store 14, the #3 store by revenue, lost **15%**, and stores 35 and 36 lost 22% and 32%.
 3. **Plan the holiday peak on the real calendar, not on the dataset's holiday flag.** The week before Christmas sells **+67–75%** above a median week and Thanksgiving week **+42–44%**. The flagged "Christmas" week (the one after Dec 25) sells **at or below** a median week. Nov–Dec represents **~21% of yearly revenue in 17% of the weeks**.
 4. **Back the departments that carry growth, review the ones that shrink.** The top 10 departments make **46% of revenue**. Departments 92, 87 and 90 drove most of the growth (+$26M between Feb–Oct 2010 and 2012), while departments 55 and 6 fell by 25% and 35%.
@@ -58,6 +60,8 @@ Store and department identity explain most of the variation: a simple average pe
 | **Visualization** | Correlations, distributions, rankings, holidays |
 | **Modeling** | Optional forecasting annex (baseline vs simple models) |
 | **Resources** | Stack and data source |
+
+![Dashboard page: KPIs, weekly sales trend and top 10 stores](images/screenshots/dashboard.png)
 
 ---
 
@@ -124,6 +128,21 @@ retail-data-analysis/
 ├── .github/workflows/ci.yml
 └── requirements.txt
 ```
+
+---
+
+## Data
+
+[Walmart Store Sales Forecasting](https://www.kaggle.com/datasets/manjeetsingh/retaildataset/data) (Kaggle): anonymized weekly sales of 45 US stores, Feb 2010 – Oct 2012, in three files (`stores.csv`, `sales.csv`, `features.csv`). Each `Date` is the Friday that ends the week. `data/merged_retail_data.csv` joins the three files on store and week.
+
+---
+
+## Limits
+
+- **The upside is an order of magnitude, not a forecast.** The ~$140M assumes sales grow in proportion to floor space, and that a store can reach its type's median.
+- **Two and a half years of history.** Only two holiday seasons (2010 and 2011), so the peak figures rest on two data points each.
+- **Markdowns are observational.** They start in Nov 2011 and are not randomized: the absence of a lift is a reason to test, not a proof that markdowns do nothing.
+- **Anonymized data.** Store and department numbers carry no names or locations, so the recommendations name IDs, not real stores.
 
 ---
 
