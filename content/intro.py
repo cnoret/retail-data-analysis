@@ -6,6 +6,8 @@ import pandas as pd
 import streamlit as st
 
 UNDERPERFORMANCE_THRESHOLD = 0.75  # below 75% of the type median sales per sq ft
+SHRINKING_DEPT_THRESHOLD = -0.20  # departments that lost more than 20% (Feb-Oct 2012 vs 2010)
+SHRINKING_DEPT_MIN_LOSS = 1e6  # ... and more than $1M, to leave out tiny departments
 
 
 @st.cache_data
@@ -44,6 +46,24 @@ def compute_headline_figures(df):
     pre_christmas = weekly[(weekly.index.month == 12) & (weekly.index.day >= 18) & (weekly.index.day <= 24)]
     thanksgiving = weekly[(weekly.index.month == 11) & (weekly.index.day >= 22)]
 
+    # Store ranking by total revenue (1 = largest)
+    store_rank = (
+        df.groupby("Store")["Weekly_Sales"].sum().rank(ascending=False, method="min").astype(int)
+    )
+
+    # Department mix: share of revenue and change on comparable months
+    dept_share = df.groupby("Dept")["Weekly_Sales"].sum().sort_values(ascending=False)
+    by_dept_year = comparable.pivot_table(
+        index="Dept", columns=comparable["Date"].dt.year, values="Weekly_Sales", aggfunc="sum"
+    ).fillna(0)
+    dept_change = by_dept_year[2012] - by_dept_year[2010]
+    dept_growth = by_dept_year[2012] / by_dept_year[2010].where(by_dept_year[2010] > 0) - 1
+    growth_depts = dept_change.nlargest(3)
+    shrinking = dept_growth[
+        (dept_growth < SHRINKING_DEPT_THRESHOLD) & (dept_change < -SHRINKING_DEPT_MIN_LOSS)
+    ]
+    shrinking = shrinking.loc[dept_change[shrinking.index].sort_values().index]
+
     return {
         "annual_revenue": df["Weekly_Sales"].sum() / years,
         "under_stores": sorted(under["Store"].tolist()),
@@ -53,6 +73,12 @@ def compute_headline_figures(df):
         "total_growth": total_growth,
         "pre_christmas_lift": pre_christmas.max() / median_week - 1,
         "thanksgiving_lift": thanksgiving.max() / median_week - 1,
+        "store_14_rank": int(store_rank.get(14, 0)),
+        "top10_dept_share": dept_share.head(10).sum() / dept_share.sum(),
+        "growth_depts": [int(d) for d in growth_depts.index],
+        "growth_depts_change": float(growth_depts.sum()),
+        "shrinking_depts": [int(d) for d in shrinking.index],
+        "shrinking_depts_growth": [float(g) for g in shrinking],
     }
 
 
@@ -66,7 +92,7 @@ def introduction():
     )
 
     st.title("Walmart Store Performance Review")
-    st.caption("45 stores · 81 departments · Feb 2010 – Oct 2012 · weekly sales")
+    st.caption("45 stores · 81 departments · Feb 2010 – Oct 2012 · weekly sales (weeks end on Friday)")
 
     try:
         data = _load_overview_data()
@@ -94,22 +120,29 @@ def introduction():
     st.write("---")
 
     under_list = ", ".join(str(s) for s in figures["under_stores"])
+    growth_list = ", ".join(str(d) for d in figures["growth_depts"])
+    shrinking_list = " and ".join(
+        f"{d} ({g:+.0%})"
+        for d, g in zip(figures["shrinking_depts"], figures["shrinking_depts_growth"])
+    )
     st.subheader("Recommendations")
     st.markdown(
         f"""
 1. **Audit {len(figures['under_stores'])} underperforming stores first.**
    Stores {under_list} sell more than 25% less per square foot than the median store of
    their type. Bringing them to that median is worth up to
-   **${figures['upside_per_year'] / 1e6:.0f}M a year**.
+   **\\${figures['upside_per_year'] / 1e6:.0f}M a year**.
 2. **Investigate the decline of large stores.** {figures['declining_stores']} of 45 stores sold
-   less in Feb–Oct 2012 than in 2010. Store 14, the #3 store by revenue, changed by
-   **{figures['store_14_growth']:+.0%}**.
+   less in Feb–Oct 2012 than in 2010. Store 14, the #{figures['store_14_rank']} store by revenue,
+   changed by **{figures['store_14_growth']:+.0%}**.
 3. **Plan the holiday peak on the real calendar.** The week before Christmas sells
    **{figures['pre_christmas_lift']:+.0%}** above a median week and Thanksgiving week
    **{figures['thanksgiving_lift']:+.0%}**. The dataset's "Christmas" flag marks the week
    *after* Dec 25, which is no busier than a normal week.
-4. **Back the departments that carry growth.** The top 10 departments make 46% of revenue;
-   departments 92, 87 and 90 drove most of the growth while 55 and 6 shrank.
+4. **Back the departments that carry growth.** The top 10 departments make
+   **{figures['top10_dept_share']:.0%} of revenue**. Departments {growth_list} drove most of
+   the growth (**+\\${figures['growth_depts_change'] / 1e6:.0f}M**), while departments
+   {shrinking_list} shrank.
 5. **Test markdowns before scaling them.** Markdown weeks show no measurable lift outside
    holidays: a controlled store test is needed before spending more.
         """

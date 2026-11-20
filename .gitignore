@@ -1,5 +1,5 @@
 # ─── Model artifacts ─────────────────────────────────────────────────────────
-# Both models are pre-trained and committed (LR: 1.5KB, RF: 2.7MB)
+# Pre-trained models are committed in models/ (see scripts/train_models.py)
 
 # ─── Python ──────────────────────────────────────────────────────────────────
 **/__pycache__/
@@ -122,10 +122,6 @@ Temporary Items
 *.iml
 *.iws
 out/
-
-# ─── Claude / Claude Code ────────────────────────────────────────────────────
-.claude/
-CLAUDE.md
 
 # ─── Secrets & environment ───────────────────────────────────────────────────
 *.env

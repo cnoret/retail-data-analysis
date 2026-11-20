@@ -80,13 +80,16 @@ def exploration():
         "Weekly contextual data per store: economic indicators, fuel price, temperature, and promotional markdowns.",
         column_descriptions={
             "Store": "Store number",
-            "Date": "Week start date",
+            "Date": "Week ending date (Friday)",
             "Temperature": "Average regional temperature (°F)",
             "Fuel_Price": "Regional fuel price ($/gallon)",
             "MarkDown1-5": "Anonymized promotional markdown data (available from Nov 2011 only)",
             "CPI": "Consumer Price Index",
             "Unemployment": "Regional unemployment rate",
-            "IsHoliday": "Whether the week includes a major holiday",
+            "IsHoliday": (
+                "Holiday flag (Super Bowl, Labor Day, Thanksgiving, Christmas). "
+                "The Christmas flag falls on the week ending after Dec 25"
+            ),
         },
     )
 
@@ -97,7 +100,7 @@ def exploration():
         column_descriptions={
             "Store": "Store number",
             "Dept": "Department number",
-            "Date": "Week start date",
+            "Date": "Week ending date (Friday)",
             "Weekly_Sales": "Sales for the given department and store (USD)",
             "IsHoliday": "Whether the week includes a major holiday",
         },

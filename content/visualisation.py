@@ -52,14 +52,15 @@ def visualisation():
 
     with st.expander("Key insights"):
         st.write("""
-        - **Store & Dept** correlate strongly with `Weekly_Sales`, but they are **IDs**, not
-          continuous drivers. Treat that signal as identity (baseline), not a linear effect.
-        - **MarkDown1–5** have weak positive correlations with sales — promotions help,
-          but their effect is modest and inconsistent.
-        - **CPI and Unemployment** are negatively correlated with sales, reflecting the impact
-          of broader economic conditions.
-        - **Temperature and Fuel Price** are moderately correlated with each other (seasonal co-movement),
-          but both have near-zero direct impact on sales.
+        - **Size** is the only numeric column with a clear link to sales: bigger stores sell more.
+          `Store` and `Dept` are **IDs**, so their coefficients mean nothing; what matters is
+          *which* store and *which* department (the Store × Dept baseline).
+        - **CPI, unemployment, fuel price and temperature** are close to zero
+          (|r| < 0.03): the external context does not explain weekly sales.
+        - **MarkDown1–5** show a very weak positive correlation (r ≈ 0.02–0.05). Markdowns tend
+          to run in busy weeks, so this is not proof of a lift: within each store, high-markdown
+          weeks sell the same as other weeks (see `sql/05_markdowns.sql`).
+        - **Temperature and Fuel Price** are weakly linked to each other (r ≈ 0.14) and not to sales.
         """)
 
     st.write("---")
@@ -82,8 +83,8 @@ def visualisation():
         st.write("""
         - The distribution is **heavily right-skewed**: the vast majority of weekly sales
           fall below $100K, while a long tail extends to over $500K.
-        - The high-value outliers correspond to large-format stores (Type A) during
-          peak holiday weeks.
+        - The high-value outliers come mostly from large (type A) stores in Thanksgiving week
+          and the week before Christmas.
         - Modeling keeps the target in dollars and uses a **Store×Dept baseline + residual RF**
           so extreme weeks are explained relative to each department's typical level.
         """)
@@ -114,10 +115,11 @@ def visualisation():
 
     with st.expander("Key insights"):
         st.write("""
-        - **Store 20, Store 4, and Store 14** are the top three performers by total revenue.
-        - There is a sharp drop-off after the top ~10 stores, suggesting a two-tier performance gap.
-        - Store type (A / B / C) and surface area are likely the main differentiators —
-          larger stores naturally capture more foot traffic.
+        - **Store 20, Store 4, and Store 14** are the top three stores by total revenue, and
+          the top 10 make 39% of it.
+        - Size drives most of the ranking, so total sales alone is not a fair comparison:
+          the Overview compares **sales per square foot** with stores of the same type.
+        - On that size-adjusted view, 7 stores sit more than 25% below their type's median.
         """)
 
     st.write("---")
@@ -144,12 +146,11 @@ def visualisation():
 
     with st.expander("Key insights"):
         st.write("""
-        - Clear **annual spikes** around November–December each year, driven by
-          Thanksgiving and Christmas shopping.
-        - A secondary spike is visible in January, likely driven by post-holiday
-          clearance sales and New Year promotions.
-        - Outside peak periods, sales remain relatively stable with low volatility,
-          suggesting a predictable baseline that models can learn effectively.
+        - Two **annual spikes**: Thanksgiving week (+42–44% vs a median week) and the week
+          before Christmas (+67–75%).
+        - **January is the low point** of the year, about 10% below a median week, right
+          after the peak.
+        - The rest of the year is flat, and Feb–Oct 2012 is only +1.9% above Feb–Oct 2010.
         """)
 
     st.write("---")
@@ -172,9 +173,11 @@ def visualisation():
 
     with st.expander("Key insights"):
         st.write("""
-        - Holiday weeks show a **higher median and a wider spread** than non-holiday weeks,
-          confirming that holidays meaningfully boost sales.
-        - The effect is most pronounced in the upper tail — some holiday weeks produce
-          exceptional volumes not seen in regular weeks.
-        - This makes `IsHoliday` a valuable feature for the prediction model.
+        - Flagged weeks show a slightly higher median and a wider spread, mostly thanks to
+          **Thanksgiving**.
+        - The flag misses the real peak: the **week before Christmas** is not flagged, while
+          the flagged "Christmas" week (the one ending after Dec 25) sells at or below a
+          median week.
+        - For planning, use the real calendar (Thanksgiving week and the two weeks before
+          Christmas) rather than `IsHoliday`.
         """)
