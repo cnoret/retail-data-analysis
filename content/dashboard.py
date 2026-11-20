@@ -6,6 +6,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from content.intro import compute_headline_figures
+
 
 @st.cache_data
 def _load_dashboard_data():
@@ -30,17 +32,19 @@ def dashboard():
     total_revenue = data["Weekly_Sales"].sum()
     n_stores = int(data["Store"].nunique())
     n_depts = int(data["Dept"].nunique())
-    holiday_col = "IsHoliday_x" if "IsHoliday_x" in data.columns else "IsHoliday"
-    is_holiday = data[holiday_col].astype(bool)
-    med_h = data.loc[is_holiday, "Weekly_Sales"].median()
-    med_nh = data.loc[~is_holiday, "Weekly_Sales"].median()
-    holiday_lift_pct = (med_h / med_nh - 1) * 100 if med_nh else 0
+    figures = compute_headline_figures(data)
+    store_totals = data.groupby("Store")["Weekly_Sales"].sum()
+    top10_store_share = store_totals.nlargest(10).sum() / store_totals.sum()
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total revenue", f"${total_revenue / 1e9:.1f} B")
     col2.metric("Stores", f"{n_stores}")
     col3.metric("Departments", f"{n_depts}")
-    col4.metric("Holiday median lift", f"+{holiday_lift_pct:.0f}%")
+    col4.metric(
+        "Peak week",
+        f"{figures['pre_christmas_lift']:+.0%}",
+        help="Best week before Christmas vs a median week (chain-wide sales)",
+    )
 
     st.write("---")
 
@@ -85,7 +89,7 @@ def dashboard():
             height=340,
             margin={"t": 10, "b": 10, "l": 10, "r": 10},
             coloraxis_showscale=False,
-            yaxis={"categoryorder": "total ascending"},
+            yaxis={"type": "category", "categoryorder": "total ascending"},
         )
         st.plotly_chart(fig, width="stretch")
 
@@ -94,11 +98,15 @@ def dashboard():
     st.subheader("Key takeaways")
     st.markdown(
         f"""
-- **Seasonality** is the main time pattern: sharp peaks near Thanksgiving / Christmas.
-- **Holiday weeks** show a higher median (+{holiday_lift_pct:.0f}% vs non-holiday).
-- **Store concentration**: top locations drive a large share of total revenue.
-- **Baseline for any forecast**: mean sales by (Store, Dept) already captures most structure
-  (see Modeling annex if relevant).
+- **Seasonality** is the main time pattern: the week before Christmas sells
+  {figures['pre_christmas_lift']:+.0%} above a median week, Thanksgiving week
+  {figures['thanksgiving_lift']:+.0%}.
+- **The dataset's holiday flag is misleading for Christmas**: it marks the week *after*
+  Dec 25, which is no busier than a normal week. Plan on the real calendar.
+- **Store concentration**: the top 10 stores make {top10_store_share:.0%} of revenue, and
+  {len(figures['under_stores'])} stores sit more than 25% below their type's median sales per sq ft.
+- **Flat overall growth** ({figures['total_growth']:+.1%}, Feb–Oct 2012 vs 2010), with
+  {figures['declining_stores']} stores in decline.
         """
     )
 

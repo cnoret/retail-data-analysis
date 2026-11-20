@@ -27,7 +27,7 @@ This project answers those four questions with the chain's own sales history, th
 
 1. **Audit 7 underperforming stores first.** Stores 9, 15, 21, 25, 29, 45 (type B) and 44 (type C) sell **25–51% less per square foot** than the median store of their type. Bringing them to that median would be worth **up to ~$140M a year** (about 6% of revenue).
 2. **Investigate the decline of large stores before it spreads.** 18 of 45 stores sold less in Feb–Oct 2012 than in the same months of 2010. Store 14, the #3 store by revenue, lost **15%**, and stores 35 and 36 lost 22% and 32%.
-3. **Plan the holiday peak on the real calendar, not on the dataset's holiday flag.** The week before Christmas sells **+67–75%** above a median week and Thanksgiving week **+42–44%**. The flagged "Christmas" week (the one after Dec 25) sells **at or below** a median week. Nov–Dec represents **~21% of yearly revenue in 17% of the weeks**.
+3. **Plan the holiday peak on the real calendar, not on the dataset's holiday flag.** The week before Christmas sells **+67–75%** above a median week and Thanksgiving week **+42–44%**. The flagged "Christmas" week (the one ending after Dec 25) sells **at or below** a median week. Nov–Dec represents **~20% of yearly revenue in 17% of the weeks** (2011). Each `Date` is the Friday that ends the week.
 4. **Back the departments that carry growth, review the ones that shrink.** The top 10 departments make **46% of revenue**. Departments 92, 87 and 90 drove most of the growth (+$26M between Feb–Oct 2010 and 2012), while departments 55 and 6 fell by 25% and 35%.
 5. **Test markdowns before scaling them.** $40M of markdowns were recorded from Nov 2011, with no measurable sales lift: outside holidays, a store sells the same in its high-markdown weeks as in its other weeks (−0.1% vs its average week). A controlled test (matched stores, with and without markdowns) is needed before spending more.
 
@@ -43,7 +43,7 @@ This project answers those four questions with the chain's own sales history, th
 | How strong is seasonality? | December weeks sell 25% above other weeks; the most seasonal departments (7, 55, 5) sell 2.4–3.4× more | Weekly trend, department uplift |
 | Do external factors matter? | CPI, unemployment, fuel price and temperature show near-zero correlation with sales (\|r\| < 0.03) | Correlation analysis |
 
-Store and department identity explain most of the variation: a simple average per (store, department) already captures ~94% of it. Performance is mostly a matter of **which store and which department**, which is why the recommendations target specific stores and departments.
+Store and department identity explain most of the variation: a simple average per (store, department) already captures ~90% of it. Performance is mostly a matter of **which store and which department**, which is why the recommendations target specific stores and departments.
 
 ---
 
@@ -138,7 +138,9 @@ A short modeling section tests whether ML adds value **beyond** a business basel
 | Direct Random Forest | ~0.88 | ~$7,600 | ~$4,500 |
 | Linear Regression (foil) | ~0.06 | ~$21,000 | ~$15,000 |
 
-**Takeaway:** most of the signal is structural (which store, which department). A model on top of the baseline improves a little on holiday weeks, which supports the holiday-planning recommendation, but forecasting is not the core of this review.
+**Takeaway:** most of the signal is structural (which store, which department). A model on top of the baseline cuts the error a little (RMSE −15%), but forecasting is not the core of this review.
+
+**Limit of this check:** the hold-out runs from April to October 2012, so it contains no Thanksgiving or Christmas week. It says nothing about how well the models forecast the holiday peak.
 
 Retrain (optional): `python scripts/train_models.py`
 

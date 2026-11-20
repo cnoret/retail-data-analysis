@@ -487,6 +487,7 @@ def modelisation():
     st.caption("Pick a real store/department and a week date; Week/Month are derived automatically.")
 
     observed_depts = sorted(X_train['Dept'].astype(int).unique().tolist())
+    store_info = pd.read_csv('data/stores.csv').set_index('Store')
 
     col1, col2 = st.columns(2)
     with col1:
@@ -495,7 +496,11 @@ def modelisation():
         is_holiday = st.selectbox(
             "Holiday week?", [False, True], format_func=lambda x: "Yes" if x else "No"
         )
-        store_type = st.selectbox("Store type", ["A", "B", "C"])
+        store_type = store_info.loc[int(store), 'Type']
+        st.caption(
+            f"Store {store}: type **{store_type}**, "
+            f"{int(store_info.loc[int(store), 'Size']):,} sq ft (from stores.csv)."
+        )
         week_date = st.date_input("Week date", value=date(2012, 6, 22))
     with col2:
         temperature = st.number_input("Temperature (°F)", value=60.0)
